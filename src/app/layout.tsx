@@ -12,7 +12,7 @@ const inter = Inter({
 const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
   variable: "--font-serif",
-  weight: ["400", "500"],
+  weight: ["400", "600"],
 });
 
 export const metadata: Metadata = {
