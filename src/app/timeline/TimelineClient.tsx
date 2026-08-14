@@ -8,7 +8,6 @@ import {
   Calendar,
   Filter,
   FolderKanban,
-  Tag,
   Link2,
   ExternalLink,
   CheckCircle2,
@@ -16,12 +15,222 @@ import {
   AlertOctagon,
   MessageSquare,
   RotateCcw,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+
+const PAGE_SIZE = 9;
 
 interface TimelineClientProps {
   initialEntries: any[];
   contextsList: any[];
   categoriesList: any[];
+}
+
+function EntryCard({ entry, isExpanded, onToggle }: {
+  entry: any;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const formattedDate = new Date(entry.entryDate + "T00:00:00").toLocaleDateString("pt-BR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  const doneItems = entry.activityItems.filter((i: any) => i.type === "done_today");
+  const planItems = entry.activityItems.filter((i: any) => i.type === "plan_tomorrow");
+  const blockerItems = entry.activityItems.filter((i: any) => i.type === "blocker");
+  const commentItems = entry.activityItems.filter((i: any) => i.type === "comment");
+
+  const summaryParts: string[] = [];
+  if (doneItems.length) summaryParts.push(`${doneItems.length} feito${doneItems.length > 1 ? "s" : ""}`);
+  if (planItems.length) summaryParts.push(`${planItems.length} planejado${planItems.length > 1 ? "s" : ""}`);
+  if (blockerItems.length) summaryParts.push(`${blockerItems.length} bloqueio${blockerItems.length > 1 ? "s" : ""}`);
+  if (commentItems.length) summaryParts.push(`${commentItems.length} comentário${commentItems.length > 1 ? "s" : ""}`);
+
+  return (
+    <div
+      className={`bg-[#FFFFFF] border rounded-[10px] shadow-sm transition-all duration-200 ${
+        isExpanded
+          ? "border-[#712B13]/40 col-span-1 sm:col-span-2 md:col-span-3"
+          : "border-[#D3D1C7] hover:border-[#B4B2A9]"
+      }`}
+    >
+      {/* Card header — always visible */}
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full text-left p-4 space-y-2"
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-1.5 rounded-[6px] bg-[#FAF9F6] border border-[#D3D1C7] text-[#712B13] shrink-0">
+              <Calendar className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-serif text-sm font-medium text-[#2C2C2A] capitalize truncate">
+                {formattedDate}
+              </h3>
+            </div>
+          </div>
+          {isExpanded ? (
+            <ChevronUp className="w-4 h-4 text-[#888780] shrink-0 mt-0.5" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-[#888780] shrink-0 mt-0.5" />
+          )}
+        </div>
+
+        {/* Chips row */}
+        {(entry.context || entry.entryCategories?.length > 0) && (
+          <div className="flex flex-wrap gap-1.5">
+            {entry.context && (
+              <span
+                className="text-[11px] font-medium px-2 py-0.5 rounded-[6px] border"
+                style={getChipStyle(entry.context.color, "context", entry.context.textColor)}
+              >
+                {entry.context.name}
+              </span>
+            )}
+            {entry.entryCategories?.map((ec: any) => (
+              <span
+                key={ec.category.id}
+                className="text-[11px] font-medium px-2 py-0.5 rounded-[6px] border"
+                style={getChipStyle(ec.category.color, "category", ec.category.textColor)}
+              >
+                {ec.category.name}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Summary line — only when collapsed */}
+        {!isExpanded && summaryParts.length > 0 && (
+          <p className="text-[11px] text-[#888780]">{summaryParts.join(" · ")}</p>
+        )}
+      </button>
+
+      {/* Expanded content */}
+      {isExpanded && (
+        <div className="border-t border-[#D3D1C7] p-4 space-y-4 bg-[#FAF9F6] rounded-b-[10px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {doneItems.length > 0 && (
+              <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[8px] p-3 space-y-2">
+                <h4 className="text-[11px] font-medium text-emerald-800 flex items-center gap-1.5 uppercase tracking-wider">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  feito hoje ({doneItems.length})
+                </h4>
+                <ul className="space-y-1.5">
+                  {doneItems.map((item: any) => (
+                    <li key={item.id} className="text-xs bg-[#FAF9F6] p-2 rounded-[6px] border border-[#D3D1C7] space-y-0.5">
+                      <span className="font-medium text-[#2C2C2A] block">
+                        {renderMarkdownText(item.title || item.description)}
+                      </span>
+                      {item.title && (
+                        <span className="text-[#5F5E5A] text-[11px] block">
+                          {renderMarkdownText(item.description)}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {planItems.length > 0 && (
+              <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[8px] p-3 space-y-2">
+                <h4 className="text-[11px] font-medium text-blue-800 flex items-center gap-1.5 uppercase tracking-wider">
+                  <ListTodo className="w-3.5 h-3.5" />
+                  planejado amanhã ({planItems.length})
+                </h4>
+                <ul className="space-y-1.5">
+                  {planItems.map((item: any) => (
+                    <li key={item.id} className="text-xs bg-[#FAF9F6] p-2 rounded-[6px] border border-[#D3D1C7] space-y-0.5">
+                      <span className="font-medium text-[#2C2C2A] block">
+                        {renderMarkdownText(item.title || item.description)}
+                      </span>
+                      {item.title && (
+                        <span className="text-[#5F5E5A] text-[11px] block">
+                          {renderMarkdownText(item.description)}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {blockerItems.length > 0 && (
+              <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[8px] p-3 space-y-2">
+                <h4 className="text-[11px] font-medium text-rose-800 flex items-center gap-1.5 uppercase tracking-wider">
+                  <AlertOctagon className="w-3.5 h-3.5" />
+                  bloqueios ({blockerItems.length})
+                </h4>
+                <ul className="space-y-1.5">
+                  {blockerItems.map((item: any) => (
+                    <li key={item.id} className="text-xs bg-[#FAF9F6] p-2 rounded-[6px] border border-[#D3D1C7] space-y-0.5">
+                      <span className="font-medium text-rose-900 block">
+                        {renderMarkdownText(item.title || item.description)}
+                      </span>
+                      {item.title && (
+                        <span className="text-[#5F5E5A] text-[11px] block">
+                          {renderMarkdownText(item.description)}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {commentItems.length > 0 && (
+              <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[8px] p-3 space-y-2">
+                <h4 className="text-[11px] font-medium text-amber-800 flex items-center gap-1.5 uppercase tracking-wider">
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  comentários ({commentItems.length})
+                </h4>
+                <ul className="space-y-1.5">
+                  {commentItems.map((item: any) => (
+                    <li key={item.id} className="text-xs bg-[#FAF9F6] p-2 rounded-[6px] border border-[#D3D1C7] space-y-0.5">
+                      <span className="font-medium text-[#2C2C2A] block">
+                        {renderMarkdownText(item.title || item.description)}
+                      </span>
+                      {item.title && (
+                        <span className="text-[#5F5E5A] text-[11px] block">
+                          {renderMarkdownText(item.description)}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {entry.artifacts?.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#D3D1C7]">
+              <span className="text-[11px] font-medium text-[#5F5E5A] flex items-center gap-1">
+                <Link2 className="w-3.5 h-3.5 text-[#712B13]" />
+                artefatos:
+              </span>
+              {entry.artifacts.map((art: any) => (
+                <a
+                  key={art.id}
+                  href={art.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-[#712B13] hover:underline bg-[#FFFFFF] px-2.5 py-1 rounded-[6px] border border-[#D3D1C7] flex items-center gap-1.5"
+                >
+                  {art.label || art.url}
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function TimelineClient({
@@ -34,6 +243,8 @@ export default function TimelineClient({
   const [categoryId, setCategoryId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [isPending, startTransition] = useTransition();
 
@@ -43,6 +254,8 @@ export default function TimelineClient({
     newStart = startDate,
     newEnd = endDate
   ) => {
+    setExpandedId(null);
+    setCurrentPage(1);
     startTransition(async () => {
       const data = await getTimelineEntries({
         contextId: newCtx || undefined,
@@ -59,8 +272,20 @@ export default function TimelineClient({
     setCategoryId("");
     setStartDate("");
     setEndDate("");
+    setExpandedId(null);
+    setCurrentPage(1);
     handleFilter("", "", "", "");
   };
+
+  const handleToggleCard = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
+  const totalPages = Math.ceil(entriesList.length / PAGE_SIZE);
+  const paginatedEntries = entriesList.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="space-y-6 font-sans">
@@ -83,294 +308,120 @@ export default function TimelineClient({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-          {/* Context Filter */}
           <div>
             <label className="block text-[11px] text-[#5F5E5A] mb-1">contexto</label>
             <select
               value={contextId}
-              onChange={(e) => {
-                setContextId(e.target.value);
-                handleFilter(e.target.value, categoryId, startDate, endDate);
-              }}
+              onChange={(e) => { setContextId(e.target.value); handleFilter(e.target.value, categoryId, startDate, endDate); }}
               className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             >
               <option value="">todos os contextos</option>
-              {contextsList.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
+              {contextsList.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
-
-          {/* Category Filter */}
           <div>
             <label className="block text-[11px] text-[#5F5E5A] mb-1">categoria</label>
             <select
               value={categoryId}
-              onChange={(e) => {
-                setCategoryId(e.target.value);
-                handleFilter(contextId, e.target.value, startDate, endDate);
-              }}
+              onChange={(e) => { setCategoryId(e.target.value); handleFilter(contextId, e.target.value, startDate, endDate); }}
               className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             >
               <option value="">todas as categorias</option>
-              {categoriesList.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
+              {categoriesList.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
-
-          {/* Start Date Filter */}
           <div>
             <label className="block text-[11px] text-[#5F5E5A] mb-1">data inicial</label>
             <input
               type="date"
               value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                handleFilter(contextId, categoryId, e.target.value, endDate);
-              }}
+              onChange={(e) => { setStartDate(e.target.value); handleFilter(contextId, categoryId, e.target.value, endDate); }}
               className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             />
           </div>
-
-          {/* End Date Filter */}
           <div>
             <label className="block text-[11px] text-[#5F5E5A] mb-1">data final</label>
             <input
               type="date"
               value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                handleFilter(contextId, categoryId, startDate, e.target.value);
-              }}
+              onChange={(e) => { setEndDate(e.target.value); handleFilter(contextId, categoryId, startDate, e.target.value); }}
               className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             />
           </div>
         </div>
       </div>
 
-      {/* Entries List */}
-      <div className="space-y-6">
-        {entriesList.length === 0 ? (
-          <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-12 text-center space-y-2 shadow-sm">
-            <Calendar className="w-8 h-8 text-[#888780] mx-auto" />
-            <h3 className="font-serif text-base font-medium text-[#2C2C2A]">
-              nenhuma entrada encontrada
-            </h3>
-            <p className="text-xs text-[#5F5E5A] max-w-sm mx-auto">
-              não existem registros para os filtros selecionados. tente ajustar os filtros ou registrar um novo dia.
-            </p>
-          </div>
-        ) : (
-          entriesList.map((entry) => {
-            const formattedDate = new Date(
-              entry.entryDate + "T00:00:00"
-            ).toLocaleDateString("pt-BR", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            });
+      {/* Count */}
+      {entriesList.length > 0 && (
+        <div className="text-xs text-[#5F5E5A]">
+          {entriesList.length} {entriesList.length === 1 ? "entrada encontrada" : "entradas encontradas"}
+          {totalPages > 1 && ` · página ${currentPage} de ${totalPages}`}
+        </div>
+      )}
 
-            const doneItems = entry.activityItems.filter(
-              (i: any) => i.type === "done_today"
-            );
-            const planItems = entry.activityItems.filter(
-              (i: any) => i.type === "plan_tomorrow"
-            );
-            const blockerItems = entry.activityItems.filter(
-              (i: any) => i.type === "blocker"
-            );
-            const commentItems = entry.activityItems.filter(
-              (i: any) => i.type === "comment"
-            );
+      {/* Grid */}
+      {entriesList.length === 0 ? (
+        <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-12 text-center space-y-2 shadow-sm">
+          <Calendar className="w-8 h-8 text-[#888780] mx-auto" />
+          <h3 className="font-serif text-base font-medium text-[#2C2C2A]">
+            nenhuma entrada encontrada
+          </h3>
+          <p className="text-xs text-[#5F5E5A] max-w-sm mx-auto">
+            não existem registros para os filtros selecionados. tente ajustar os filtros ou registrar um novo dia.
+          </p>
+        </div>
+      ) : (
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 transition-opacity duration-200 ${isPending ? "opacity-50" : "opacity-100"}`}
+        >
+          {paginatedEntries.map((entry) => (
+            <EntryCard
+              key={entry.id}
+              entry={entry}
+              isExpanded={expandedId === entry.id}
+              onToggle={() => handleToggleCard(entry.id)}
+            />
+          ))}
+        </div>
+      )}
 
-            return (
-              <div
-                key={entry.id}
-                className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-6 space-y-5 shadow-sm hover:border-[#B4B2A9] transition-colors"
-              >
-                {/* Header: Date, Context badge, Categories chips */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#D3D1C7] pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-[6px] bg-[#FAF9F6] border border-[#D3D1C7] text-[#712B13]">
-                      <Calendar className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="font-serif text-base font-medium text-[#2C2C2A] capitalize">
-                        {formattedDate}
-                      </h3>
-                      <span className="text-[11px] text-[#888780]">
-                        log #{entry.id.substring(0, 8)}
-                      </span>
-                    </div>
-                  </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <button
+            type="button"
+            onClick={() => { setCurrentPage((p) => Math.max(1, p - 1)); setExpandedId(null); }}
+            disabled={currentPage === 1}
+            className="p-2 rounded-[6px] border border-[#D3D1C7] text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Context Badge (Light Shade) */}
-                    {entry.context && (
-                      <span
-                        className="text-xs font-medium px-2.5 py-0.5 rounded-[8px] border"
-                        style={getChipStyle(entry.context.color, "context", entry.context.textColor)}
-                      >
-                        {entry.context.name}
-                      </span>
-                    )}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              type="button"
+              onClick={() => { setCurrentPage(page); setExpandedId(null); }}
+              className={`w-8 h-8 text-xs rounded-[6px] border transition-all ${
+                page === currentPage
+                  ? "bg-[#712B13] text-white border-[#712B13]"
+                  : "border-[#D3D1C7] text-[#5F5E5A] hover:bg-[#FAF9F6]"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
 
-                    {/* Category Chips (Medium Shade) */}
-                    {entry.entryCategories?.map((ec: any) => (
-                      <span
-                        key={ec.category.id}
-                        className="text-xs font-medium px-2.5 py-0.5 rounded-[8px] border"
-                        style={getChipStyle(ec.category.color, "category", ec.category.textColor)}
-                      >
-                        {ec.category.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Items Sections */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Done Today */}
-                  {doneItems.length > 0 && (
-                    <div className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-4 space-y-2.5">
-                      <h4 className="text-xs font-medium text-emerald-800 flex items-center gap-1.5 uppercase tracking-wider">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        feito hoje ({doneItems.length})
-                      </h4>
-                      <ul className="space-y-2">
-                        {doneItems.map((item: any) => (
-                          <li
-                            key={item.id}
-                            className="text-xs bg-[#FFFFFF] p-2.5 rounded-[6px] border border-[#D3D1C7] space-y-1"
-                          >
-                            <span className="font-medium text-[#2C2C2A] block">
-                              {renderMarkdownText(item.title || item.description)}
-                            </span>
-                            {item.title && (
-                              <div className="text-[#5F5E5A] block text-[11px]">
-                                {renderMarkdownText(item.description)}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Plan Tomorrow */}
-                  {planItems.length > 0 && (
-                    <div className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-4 space-y-2.5">
-                      <h4 className="text-xs font-medium text-blue-800 flex items-center gap-1.5 uppercase tracking-wider">
-                        <ListTodo className="w-3.5 h-3.5" />
-                        planejado amanhã ({planItems.length})
-                      </h4>
-                      <ul className="space-y-2">
-                        {planItems.map((item: any) => (
-                          <li
-                            key={item.id}
-                            className="text-xs bg-[#FFFFFF] p-2.5 rounded-[6px] border border-[#D3D1C7] space-y-1"
-                          >
-                            <span className="font-medium text-[#2C2C2A] block">
-                              {renderMarkdownText(item.title || item.description)}
-                            </span>
-                            {item.title && (
-                              <div className="text-[#5F5E5A] block text-[11px]">
-                                {renderMarkdownText(item.description)}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Blockers */}
-                  {blockerItems.length > 0 && (
-                    <div className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-4 space-y-2.5">
-                      <h4 className="text-xs font-medium text-rose-800 flex items-center gap-1.5 uppercase tracking-wider">
-                        <AlertOctagon className="w-3.5 h-3.5" />
-                        bloqueios ({blockerItems.length})
-                      </h4>
-                      <ul className="space-y-2">
-                        {blockerItems.map((item: any) => (
-                          <li
-                            key={item.id}
-                            className="text-xs bg-[#FFFFFF] p-2.5 rounded-[6px] border border-[#D3D1C7] space-y-1"
-                          >
-                            <span className="font-medium text-rose-900 block">
-                              {renderMarkdownText(item.title || item.description)}
-                            </span>
-                            {item.title && (
-                              <div className="text-[#5F5E5A] block text-[11px]">
-                                {renderMarkdownText(item.description)}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Comments */}
-                  {commentItems.length > 0 && (
-                    <div className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-4 space-y-2.5">
-                      <h4 className="text-xs font-medium text-amber-800 flex items-center gap-1.5 uppercase tracking-wider">
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        comentários extra ({commentItems.length})
-                      </h4>
-                      <ul className="space-y-2">
-                        {commentItems.map((item: any) => (
-                          <li
-                            key={item.id}
-                            className="text-xs bg-[#FFFFFF] p-2.5 rounded-[6px] border border-[#D3D1C7] space-y-1"
-                          >
-                            <span className="font-medium text-[#2C2C2A] block">
-                              {renderMarkdownText(item.title || item.description)}
-                            </span>
-                            {item.title && (
-                              <div className="text-[#5F5E5A] block text-[11px]">
-                                {renderMarkdownText(item.description)}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                {/* Artifacts Section */}
-                {entry.artifacts && entry.artifacts.length > 0 && (
-                  <div className="pt-2 border-t border-[#D3D1C7] flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-medium text-[#5F5E5A] flex items-center gap-1 mr-1">
-                      <Link2 className="w-3.5 h-3.5 text-[#712B13]" />
-                      artefatos:
-                    </span>
-                    {entry.artifacts.map((art: any) => (
-                      <a
-                        key={art.id}
-                        href={art.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-[#712B13] hover:underline bg-[#FAF9F6] px-2.5 py-1 rounded-[6px] border border-[#D3D1C7] flex items-center gap-1.5 transition-colors"
-                      >
-                        <span>{art.label || art.url}</span>
-                        <ExternalLink className="w-3 h-3 text-[#712B13]" />
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
+          <button
+            type="button"
+            onClick={() => { setCurrentPage((p) => Math.min(totalPages, p + 1)); setExpandedId(null); }}
+            disabled={currentPage === totalPages}
+            className="p-2 rounded-[6px] border border-[#D3D1C7] text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
