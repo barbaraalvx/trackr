@@ -1,6 +1,8 @@
 import { getContexts, getCategories, getAppSettings } from "./actions";
 import AdminClient from "./AdminClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const initialContexts = await getContexts();
   const initialCategories = await getCategories();

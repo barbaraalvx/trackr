@@ -1,6 +1,8 @@
 import { getContexts } from "@/app/admin/actions";
 import SummariesClient from "./SummariesClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function SummariesPage() {
   const contextsList = await getContexts();
 

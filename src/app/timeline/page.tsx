@@ -2,6 +2,8 @@ import { getContexts, getCategories } from "@/app/admin/actions";
 import { getTimelineEntries } from "./actions";
 import TimelineClient from "./TimelineClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function TimelinePage() {
   const initialEntries = await getTimelineEntries();
   const contextsList = await getContexts();
