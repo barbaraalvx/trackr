@@ -7,6 +7,15 @@ import { calculatePeriodDates } from "@/lib/utils/period-calculator";
 import { generateSummaryWithGemini, GroupedDayData } from "@/lib/ai/summary-generator";
 import { revalidatePath } from "next/cache";
 
+export async function getSavedSummaries() {
+  return await db
+    .select()
+    .from(summaries)
+    .orderBy(desc(summaries.generatedAt))
+    .limit(50);
+}
+
+
 export async function getOrGenerateSummary(params: {
   periodType: "daily" | "weekly" | "biweekly" | "monthly" | "custom";
   contextId?: string;

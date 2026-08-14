@@ -1,10 +1,12 @@
 import { getContexts } from "@/app/admin/actions";
+import { getSavedSummaries } from "./actions";
 import SummariesClient from "./SummariesClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function SummariesPage() {
   const contextsList = await getContexts();
+  const savedSummaries = await getSavedSummaries();
 
   return (
     <div className="space-y-6 pb-12 font-sans">
@@ -17,7 +19,7 @@ export default async function SummariesPage() {
         </p>
       </div>
 
-      <SummariesClient contextsList={contextsList} />
+      <SummariesClient contextsList={contextsList} savedSummaries={savedSummaries} />
     </div>
   );
 }
