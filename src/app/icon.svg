@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Warm background squircle -->
+  <rect width="32" height="32" rx="7" fill="#FAF9F6" stroke="#D3D1C7" stroke-width="1" />
+  
+  <!-- Stacked layers in Brand Coral #712B13 -->
+  <path d="M16 7L6 12L16 17L26 12L16 7Z" fill="none" stroke="#712B13" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M6 16.5L16 21.5L26 16.5" fill="none" stroke="#712B13" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M6 21L16 26L26 21" fill="none" stroke="#712B13" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+</svg>
