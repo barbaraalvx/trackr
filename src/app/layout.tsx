@@ -16,8 +16,8 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "Trackr — Log Diário de Atividades",
-  description: "Sistema inteligente para registro diário de trabalho e resumos com IA",
+  title: "trackr",
+  description: "registro diário de atividades e resumos inteligentes com ia",
   manifest: "/manifest.json",
 };
 
