@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { getTimelineEntries } from "./actions";
+import { renderMarkdownText } from "@/lib/utils/markdown-renderer";
 import {
   Calendar,
   Filter,
@@ -255,15 +256,15 @@ export default function TimelineClient({
                         {doneItems.map((item: any) => (
                           <li
                             key={item.id}
-                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-0.5"
+                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1"
                           >
                             <span className="font-semibold text-slate-200 block">
-                              {item.title || item.description}
+                              {renderMarkdownText(item.title || item.description)}
                             </span>
                             {item.title && (
-                              <span className="text-slate-400 block text-[11px]">
-                                {item.description}
-                              </span>
+                              <div className="text-slate-400 block text-[11px]">
+                                {renderMarkdownText(item.description)}
+                              </div>
                             )}
                           </li>
                         ))}
@@ -282,15 +283,15 @@ export default function TimelineClient({
                         {planItems.map((item: any) => (
                           <li
                             key={item.id}
-                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-0.5"
+                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1"
                           >
                             <span className="font-semibold text-slate-200 block">
-                              {item.title || item.description}
+                              {renderMarkdownText(item.title || item.description)}
                             </span>
                             {item.title && (
-                              <span className="text-slate-400 block text-[11px]">
-                                {item.description}
-                              </span>
+                              <div className="text-slate-400 block text-[11px]">
+                                {renderMarkdownText(item.description)}
+                              </div>
                             )}
                           </li>
                         ))}
@@ -309,15 +310,15 @@ export default function TimelineClient({
                         {blockerItems.map((item: any) => (
                           <li
                             key={item.id}
-                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-0.5"
+                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1"
                           >
                             <span className="font-semibold text-rose-300 block">
-                              {item.title || item.description}
+                              {renderMarkdownText(item.title || item.description)}
                             </span>
                             {item.title && (
-                              <span className="text-slate-400 block text-[11px]">
-                                {item.description}
-                              </span>
+                              <div className="text-slate-400 block text-[11px]">
+                                {renderMarkdownText(item.description)}
+                              </div>
                             )}
                           </li>
                         ))}
@@ -336,15 +337,15 @@ export default function TimelineClient({
                         {commentItems.map((item: any) => (
                           <li
                             key={item.id}
-                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-0.5"
+                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1"
                           >
                             <span className="font-semibold text-slate-200 block">
-                              {item.title || item.description}
+                              {renderMarkdownText(item.title || item.description)}
                             </span>
                             {item.title && (
-                              <span className="text-slate-400 block text-[11px]">
-                                {item.description}
-                              </span>
+                              <div className="text-slate-400 block text-[11px]">
+                                {renderMarkdownText(item.description)}
+                              </div>
                             )}
                           </li>
                         ))}

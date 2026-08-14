@@ -15,6 +15,10 @@ import {
   X,
   Edit2,
   Loader2,
+  Bold,
+  Italic,
+  Code,
+  List,
 } from "lucide-react";
 
 interface EntryFormProps {
@@ -72,6 +76,14 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
     setArtifactsList((prev) =>
       prev.map((art, i) => (i === index ? { ...art, [field]: value } : art))
     );
+  };
+
+  const insertMarkdown = (
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    prefix: string,
+    suffix: string = ""
+  ) => {
+    setter((prev) => `${prev}${prefix}texto${suffix}`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,7 +162,7 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
             Nova Entrada de Log
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Digite suas atividades em texto livre por campo. A IA vai nomear e organizar tudo.
+            Digite suas atividades em texto livre com suporte a Markdown. A IA nomeará e organizará os itens.
           </p>
         </div>
       </div>
@@ -173,13 +185,13 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Meta Header Bar: Date, Context */}
+        {/* 1. Data da Entrada & Contexto */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm">
           {/* Date picker */}
           <div>
             <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-2">
               <Calendar className="w-4 h-4 text-indigo-400" />
-              Data da Entrada
+              1. Data da Entrada
             </label>
             <input
               type="date"
@@ -212,113 +224,97 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
           </div>
         </div>
 
-        {/* Categories Multi-Select Chips */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm">
-          <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-3">
-            <Tag className="w-4 h-4 text-emerald-400" />
-            Categorias do Dia (Tags)
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {categoriesList.filter((c) => !c.archived).length === 0 ? (
-              <p className="text-xs text-slate-500">
-                Nenhuma categoria cadastrada. Cadastre em Admin.
-              </p>
-            ) : (
-              categoriesList
-                .filter((c) => !c.archived)
-                .map((cat) => {
-                  const isSelected = selectedCategoryIds.includes(cat.id);
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => handleToggleCategory(cat.id)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all flex items-center gap-2 ${
-                        isSelected
-                          ? "bg-slate-800 text-slate-100 shadow-sm"
-                          : "bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700"
-                      }`}
-                      style={{
-                        borderColor: isSelected ? cat.color : undefined,
-                      }}
-                    >
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: cat.color }}
-                      />
-                      <span>{cat.name}</span>
-                    </button>
-                  );
-                })
-            )}
+        {/* 2. O que fiz hoje? */}
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold text-emerald-400">
+              2. O que fiz hoje? <span className="text-xs font-normal text-slate-400">(um item por linha)</span>
+            </label>
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => insertMarkdown(setDoneToday, "**", "**")} title="Negrito" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Bold className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setDoneToday, "*", "*")} title="Itálico" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Italic className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setDoneToday, "`", "`")} title="Código" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Code className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setDoneToday, "- ")} title="Lista" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><List className="w-3.5 h-3.5" /></button>
+            </div>
           </div>
+          <textarea
+            rows={4}
+            value={doneToday}
+            onChange={(e) => setDoneToday(e.target.value)}
+            placeholder="- Corrigido **bug de renderização** no dashboard&#10;- Implementada integração com `API` de pagamentos&#10;- Reunião de alinhamento com equipe"
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition-colors font-mono text-xs sm:text-sm"
+          />
         </div>
 
-        {/* Textareas */}
-        <div className="space-y-4">
-          {/* Done Today */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
-            <label className="block text-sm font-semibold text-emerald-400">
-              O que fiz hoje? <span className="text-xs font-normal text-slate-400">(um item por linha/bullet)</span>
+        {/* 3. O que vou fazer amanhã? */}
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold text-indigo-400">
+              3. O que vou fazer amanhã? <span className="text-xs font-normal text-slate-400">(um item por linha)</span>
             </label>
-            <textarea
-              rows={4}
-              value={doneToday}
-              onChange={(e) => setDoneToday(e.target.value)}
-              placeholder="- Corrigido bug de renderização no dashboard&#10;- Implementada integração com API de pagamentos&#10;- Reunião de alinhamento com equipe"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
-            />
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "**", "**")} title="Negrito" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Bold className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "*", "*")} title="Itálico" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Italic className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "`", "`")} title="Código" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Code className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "- ")} title="Lista" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><List className="w-3.5 h-3.5" /></button>
+            </div>
           </div>
-
-          {/* Plan Tomorrow */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
-            <label className="block text-sm font-semibold text-indigo-400">
-              O que vou fazer amanhã? <span className="text-xs font-normal text-slate-400">(um item por linha/bullet)</span>
-            </label>
-            <textarea
-              rows={3}
-              value={planTomorrow}
-              onChange={(e) => setPlanTomorrow(e.target.value)}
-              placeholder="- Finalizar testes unitários do módulo X&#10;- Documentar endpoints da API"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          {/* Blockers */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
-            <label className="block text-sm font-semibold text-rose-400">
-              Bloqueios / Impedimentos <span className="text-xs font-normal text-slate-400">(opcional, um item por linha)</span>
-            </label>
-            <textarea
-              rows={2}
-              value={blockers}
-              onChange={(e) => setBlockers(e.target.value)}
-              placeholder="- Aguardando credenciais do ambiente de homologação"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-rose-500 transition-colors"
-            />
-          </div>
-
-          {/* Comments */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
-            <label className="block text-sm font-semibold text-amber-400">
-              Comentários extra <span className="text-xs font-normal text-slate-400">(opcional)</span>
-            </label>
-            <textarea
-              rows={2}
-              value={comments}
-              onChange={(e) => setComments(e.target.value)}
-              placeholder="- Boa evolução na sprint hoje; impedimento do backend resolvido"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-amber-500 transition-colors"
-            />
-          </div>
+          <textarea
+            rows={3}
+            value={planTomorrow}
+            onChange={(e) => setPlanTomorrow(e.target.value)}
+            placeholder="- Finalizar testes unitários do módulo **X**&#10;- Documentar `endpoints` da API"
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition-colors font-mono text-xs sm:text-sm"
+          />
         </div>
 
-        {/* Dynamic Artifacts Block */}
+        {/* 4. Bloqueios / Impedimentos */}
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold text-rose-400">
+              4. Bloqueios / Impedimentos <span className="text-xs font-normal text-slate-400">(opcional, um item por linha)</span>
+            </label>
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => insertMarkdown(setBlockers, "**", "**")} title="Negrito" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Bold className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setBlockers, "*", "*")} title="Itálico" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Italic className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setBlockers, "`", "`")} title="Código" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Code className="w-3.5 h-3.5" /></button>
+            </div>
+          </div>
+          <textarea
+            rows={2}
+            value={blockers}
+            onChange={(e) => setBlockers(e.target.value)}
+            placeholder="- Aguardando credenciais do ambiente de `homologação`"
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-rose-500 transition-colors font-mono text-xs sm:text-sm"
+          />
+        </div>
+
+        {/* 5. Comentários Extra */}
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold text-amber-400">
+              5. Comentários Extra <span className="text-xs font-normal text-slate-400">(opcional)</span>
+            </label>
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => insertMarkdown(setComments, "**", "**")} title="Negrito" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Bold className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setComments, "*", "*")} title="Itálico" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Italic className="w-3.5 h-3.5" /></button>
+            </div>
+          </div>
+          <textarea
+            rows={2}
+            value={comments}
+            onChange={(e) => setComments(e.target.value)}
+            placeholder="- Boa evolução na sprint hoje; impedimento do backend resolvido"
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-amber-500 transition-colors font-mono text-xs sm:text-sm"
+          />
+        </div>
+
+        {/* 6. Artefatos / Links */}
         <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-3">
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 text-xs font-semibold text-slate-300">
               <Link2 className="w-4 h-4 text-indigo-400" />
-              Artefatos / Links <span className="text-slate-500 font-normal">(PRs, Docs, Figma, etc.)</span>
+              6. Artefatos / Links <span className="text-slate-500 font-normal">(PRs, Docs, Figma, etc.)</span>
             </label>
             <button
               type="button"
@@ -368,6 +364,48 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
               ))}
             </div>
           )}
+        </div>
+
+        {/* 7. Categorias do dia (Tags) */}
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm">
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-3">
+            <Tag className="w-4 h-4 text-emerald-400" />
+            7. Categorias do Dia (Tags)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {categoriesList.filter((c) => !c.archived).length === 0 ? (
+              <p className="text-xs text-slate-500">
+                Nenhuma categoria cadastrada. Cadastre em Admin.
+              </p>
+            ) : (
+              categoriesList
+                .filter((c) => !c.archived)
+                .map((cat) => {
+                  const isSelected = selectedCategoryIds.includes(cat.id);
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => handleToggleCategory(cat.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all flex items-center gap-2 ${
+                        isSelected
+                          ? "bg-slate-800 text-slate-100 shadow-sm"
+                          : "bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700"
+                      }`}
+                      style={{
+                        borderColor: isSelected ? cat.color : undefined,
+                      }}
+                    >
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                      <span>{cat.name}</span>
+                    </button>
+                  );
+                })
+            )}
+          </div>
         </div>
 
         {/* Submit Button */}
