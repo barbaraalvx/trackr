@@ -383,7 +383,7 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
                 .filter((c) => !c.archived)
                 .map((cat) => {
                   const isSelected = selectedCategoryIds.includes(cat.id);
-                  const chipStyle = getChipStyle(cat.color, "category");
+                  const chipStyle = getChipStyle(cat.color, "category", cat.textColor);
                   return (
                     <button
                       key={cat.id}

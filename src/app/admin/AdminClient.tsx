@@ -3,13 +3,31 @@
 import { useState, useTransition } from "react";
 import {
   createContext,
+  updateContext,
   toggleArchiveContext,
+  deleteContext,
   createCategory,
+  updateCategory,
   toggleArchiveCategory,
+  deleteCategory,
   updateRequireConfirmation,
 } from "./actions";
 import { CHIP_FAMILIES, getChipStyle } from "@/lib/constants/chip-colors";
-import { Plus, Archive, ArchiveRestore, Settings2, Tag, FolderKanban, Check, Pipette } from "lucide-react";
+import {
+  Plus,
+  Archive,
+  ArchiveRestore,
+  Settings2,
+  Tag,
+  FolderKanban,
+  Check,
+  Pipette,
+  Pencil,
+  Trash2,
+  X,
+  Palette,
+  Type,
+} from "lucide-react";
 
 interface AdminClientProps {
   initialContexts: any[];
@@ -27,13 +45,23 @@ export default function AdminClient({
   );
   const [isPending, startTransition] = useTransition();
 
-  // Context form
+  // Create forms state
   const [contextName, setContextName] = useState("");
   const [contextColor, setContextColor] = useState(CHIP_FAMILIES[0].id);
+  const [contextTextColor, setContextTextColor] = useState("");
 
-  // Category form
   const [categoryName, setCategoryName] = useState("");
   const [categoryColor, setCategoryColor] = useState(CHIP_FAMILIES[1].id);
+  const [categoryTextColor, setCategoryTextColor] = useState("");
+
+  // Edit Modal State
+  const [editingItem, setEditingItem] = useState<{
+    id: string;
+    type: "context" | "category";
+    name: string;
+    color: string;
+    textColor: string;
+  } | null>(null);
 
   const handleToggleSetting = (checked: boolean) => {
     setRequireConfirm(checked);
@@ -49,10 +77,12 @@ export default function AdminClient({
     const formData = new FormData();
     formData.append("name", contextName);
     formData.append("color", contextColor);
+    formData.append("textColor", contextTextColor);
 
     startTransition(async () => {
       await createContext(formData);
       setContextName("");
+      setContextTextColor("");
     });
   };
 
@@ -63,10 +93,45 @@ export default function AdminClient({
     const formData = new FormData();
     formData.append("name", categoryName);
     formData.append("color", categoryColor);
+    formData.append("textColor", categoryTextColor);
 
     startTransition(async () => {
       await createCategory(formData);
       setCategoryName("");
+      setCategoryTextColor("");
+    });
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem || !editingItem.name.trim()) return;
+
+    const formData = new FormData();
+    formData.append("name", editingItem.name);
+    formData.append("color", editingItem.color);
+    formData.append("textColor", editingItem.textColor);
+
+    startTransition(async () => {
+      if (editingItem.type === "context") {
+        await updateContext(editingItem.id, formData);
+      } else {
+        await updateCategory(editingItem.id, formData);
+      }
+      setEditingItem(null);
+    });
+  };
+
+  const handleDeleteItem = async (id: string, type: "context" | "category", name: string) => {
+    if (!window.confirm(`Tem certeza que deseja excluir permanentemente o item "${name}"?`)) {
+      return;
+    }
+
+    startTransition(async () => {
+      if (type === "context") {
+        await deleteContext(id);
+      } else {
+        await deleteCategory(id);
+      }
     });
   };
 
@@ -152,38 +217,66 @@ export default function AdminClient({
               </button>
             </div>
 
-            {/* Color selector with 8 families */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] text-[#5F5E5A]">cor:</span>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {CHIP_FAMILIES.map((fam) => (
-                  <button
-                    key={fam.id}
-                    type="button"
-                    title={fam.name}
-                    onClick={() => setContextColor(fam.id)}
-                    style={{ backgroundColor: fam.light.bg, borderColor: fam.light.text }}
-                    className={`w-5 h-5 rounded-[6px] border transition-transform flex items-center justify-center ${
-                      contextColor === fam.id ? "scale-110 ring-2 ring-[#712B13] ring-offset-1" : "opacity-80 hover:opacity-100"
-                    }`}
-                  >
-                    {contextColor === fam.id && <Check className="w-3 h-3 text-[#2C2C2A]" />}
-                  </button>
-                ))}
+            {/* Background Color & Text Color Pickers */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] text-[#5F5E5A] flex items-center gap-1">
+                  <Palette className="w-3 h-3 text-[#712B13]" /> cor fundo:
+                </span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {CHIP_FAMILIES.map((fam) => (
+                    <button
+                      key={fam.id}
+                      type="button"
+                      title={fam.name}
+                      onClick={() => setContextColor(fam.id)}
+                      style={{ backgroundColor: fam.light.bg, borderColor: fam.light.text }}
+                      className={`w-4 h-4 rounded-[4px] border transition-transform flex items-center justify-center ${
+                        contextColor === fam.id ? "scale-125 ring-2 ring-[#712B13] ring-offset-1" : "opacity-80 hover:opacity-100"
+                      }`}
+                    >
+                      {contextColor === fam.id && <Check className="w-2.5 h-2.5 text-[#2C2C2A]" />}
+                    </button>
+                  ))}
 
-                {/* Custom Color Picker */}
-                <label
-                  title="escolher cor personalizada"
-                  className="w-5 h-5 rounded-[6px] border border-[#D3D1C7] bg-[#FAF9F6] cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
-                >
-                  <Pipette className="w-3 h-3 text-[#5F5E5A]" />
+                  <label
+                    title="cor personalizada do fundo"
+                    className="w-4 h-4 rounded-[4px] border border-[#D3D1C7] bg-[#FAF9F6] cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
+                  >
+                    <Pipette className="w-2.5 h-2.5 text-[#5F5E5A]" />
+                    <input
+                      type="color"
+                      value={contextColor.startsWith("#") ? contextColor : "#F5C4B3"}
+                      onChange={(e) => setContextColor(e.target.value)}
+                      className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Text Color Picker */}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-[#5F5E5A] flex items-center gap-1">
+                  <Type className="w-3 h-3 text-[#712B13]" /> cor fonte:
+                </span>
+                <label className="flex items-center gap-2 cursor-pointer bg-[#FAF9F6] border border-[#D3D1C7] px-2 py-0.5 rounded-[6px] text-[11px] text-[#2C2C2A]">
                   <input
                     type="color"
-                    value={contextColor.startsWith("#") ? contextColor : "#712B13"}
-                    onChange={(e) => setContextColor(e.target.value)}
-                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                    value={contextTextColor || "#4A1B0C"}
+                    onChange={(e) => setContextTextColor(e.target.value)}
+                    className="w-4 h-4 rounded cursor-pointer border-none bg-transparent"
                   />
+                  <span>{contextTextColor ? contextTextColor : "automático"}</span>
                 </label>
+                {contextTextColor && (
+                  <button
+                    type="button"
+                    onClick={() => setContextTextColor("")}
+                    className="text-[10px] text-[#5F5E5A] hover:text-[#712B13]"
+                  >
+                    limpar
+                  </button>
+                )}
               </div>
             </div>
           </form>
@@ -196,14 +289,14 @@ export default function AdminClient({
               </p>
             ) : (
               initialContexts.map((ctx) => {
-                const chipStyle = getChipStyle(ctx.color, "context");
+                const chipStyle = getChipStyle(ctx.color, "context", ctx.textColor);
                 return (
                   <div
                     key={ctx.id}
                     className={`flex items-center justify-between p-2.5 rounded-[8px] border ${
                       ctx.archived
-                        ? "bg-[#FAF9F6] border-[#D3D1C7] text-[#888780] opacity-60"
-                        : "bg-[#FAF9F6] border-[#D3D1C7] text-[#2C2C2A]"
+                        ? "bg-[#FAF9F6] border-[#D3D1C7] opacity-60"
+                        : "bg-[#FAF9F6] border-[#D3D1C7]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -220,21 +313,50 @@ export default function AdminClient({
                       )}
                     </div>
 
-                    <button
-                      onClick={() =>
-                        startTransition(() =>
-                          toggleArchiveContext(ctx.id, ctx.archived)
-                        )
-                      }
-                      title={ctx.archived ? "desarquivar" : "arquivar"}
-                      className="p-1.5 text-[#5F5E5A] hover:text-[#712B13] hover:bg-[#EFECE6] rounded-[6px] transition-colors"
-                    >
-                      {ctx.archived ? (
-                        <ArchiveRestore className="w-3.5 h-3.5 text-emerald-600" />
-                      ) : (
-                        <Archive className="w-3.5 h-3.5" />
-                      )}
-                    </button>
+                    <div className="flex items-center gap-1">
+                      {/* Edit button */}
+                      <button
+                        onClick={() =>
+                          setEditingItem({
+                            id: ctx.id,
+                            type: "context",
+                            name: ctx.name,
+                            color: ctx.color,
+                            textColor: ctx.textColor || "",
+                          })
+                        }
+                        title="editar"
+                        className="p-1.5 text-[#5F5E5A] hover:text-[#712B13] hover:bg-[#EFECE6] rounded-[6px] transition-colors"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Archive button */}
+                      <button
+                        onClick={() =>
+                          startTransition(() =>
+                            toggleArchiveContext(ctx.id, ctx.archived)
+                          )
+                        }
+                        title={ctx.archived ? "desarquivar" : "arquivar"}
+                        className="p-1.5 text-[#5F5E5A] hover:text-[#712B13] hover:bg-[#EFECE6] rounded-[6px] transition-colors"
+                      >
+                        {ctx.archived ? (
+                          <ArchiveRestore className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : (
+                          <Archive className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      {/* Delete button */}
+                      <button
+                        onClick={() => handleDeleteItem(ctx.id, "context", ctx.name)}
+                        title="excluir permanentemente"
+                        className="p-1.5 text-[#5F5E5A] hover:text-rose-600 hover:bg-rose-50 rounded-[6px] transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 );
               })
@@ -276,38 +398,66 @@ export default function AdminClient({
               </button>
             </div>
 
-            {/* Color selector with 8 families */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] text-[#5F5E5A]">cor:</span>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {CHIP_FAMILIES.map((fam) => (
-                  <button
-                    key={fam.id}
-                    type="button"
-                    title={fam.name}
-                    onClick={() => setCategoryColor(fam.id)}
-                    style={{ backgroundColor: fam.medium.bg, borderColor: fam.medium.text }}
-                    className={`w-5 h-5 rounded-[6px] border transition-transform flex items-center justify-center ${
-                      categoryColor === fam.id ? "scale-110 ring-2 ring-[#712B13] ring-offset-1" : "opacity-80 hover:opacity-100"
-                    }`}
-                  >
-                    {categoryColor === fam.id && <Check className="w-3 h-3 text-[#2C2C2A]" />}
-                  </button>
-                ))}
+            {/* Background Color & Text Color Pickers */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] text-[#5F5E5A] flex items-center gap-1">
+                  <Palette className="w-3 h-3 text-[#712B13]" /> cor fundo:
+                </span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {CHIP_FAMILIES.map((fam) => (
+                    <button
+                      key={fam.id}
+                      type="button"
+                      title={fam.name}
+                      onClick={() => setCategoryColor(fam.id)}
+                      style={{ backgroundColor: fam.medium.bg, borderColor: fam.medium.text }}
+                      className={`w-4 h-4 rounded-[4px] border transition-transform flex items-center justify-center ${
+                        categoryColor === fam.id ? "scale-125 ring-2 ring-[#712B13] ring-offset-1" : "opacity-80 hover:opacity-100"
+                      }`}
+                    >
+                      {categoryColor === fam.id && <Check className="w-2.5 h-2.5 text-[#2C2C2A]" />}
+                    </button>
+                  ))}
 
-                {/* Custom Color Picker */}
-                <label
-                  title="escolher cor personalizada"
-                  className="w-5 h-5 rounded-[6px] border border-[#D3D1C7] bg-[#FAF9F6] cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
-                >
-                  <Pipette className="w-3 h-3 text-[#5F5E5A]" />
+                  <label
+                    title="cor personalizada do fundo"
+                    className="w-4 h-4 rounded-[4px] border border-[#D3D1C7] bg-[#FAF9F6] cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
+                  >
+                    <Pipette className="w-2.5 h-2.5 text-[#5F5E5A]" />
+                    <input
+                      type="color"
+                      value={categoryColor.startsWith("#") ? categoryColor : "#F0997B"}
+                      onChange={(e) => setCategoryColor(e.target.value)}
+                      className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Text Color Picker */}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-[#5F5E5A] flex items-center gap-1">
+                  <Type className="w-3 h-3 text-[#712B13]" /> cor fonte:
+                </span>
+                <label className="flex items-center gap-2 cursor-pointer bg-[#FAF9F6] border border-[#D3D1C7] px-2 py-0.5 rounded-[6px] text-[11px] text-[#2C2C2A]">
                   <input
                     type="color"
-                    value={categoryColor.startsWith("#") ? categoryColor : "#712B13"}
-                    onChange={(e) => setCategoryColor(e.target.value)}
-                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                    value={categoryTextColor || "#4A1B0C"}
+                    onChange={(e) => setCategoryTextColor(e.target.value)}
+                    className="w-4 h-4 rounded cursor-pointer border-none bg-transparent"
                   />
+                  <span>{categoryTextColor ? categoryTextColor : "automático"}</span>
                 </label>
+                {categoryTextColor && (
+                  <button
+                    type="button"
+                    onClick={() => setCategoryTextColor("")}
+                    className="text-[10px] text-[#5F5E5A] hover:text-[#712B13]"
+                  >
+                    limpar
+                  </button>
+                )}
               </div>
             </div>
           </form>
@@ -320,14 +470,14 @@ export default function AdminClient({
               </p>
             ) : (
               initialCategories.map((cat) => {
-                const chipStyle = getChipStyle(cat.color, "category");
+                const chipStyle = getChipStyle(cat.color, "category", cat.textColor);
                 return (
                   <div
                     key={cat.id}
                     className={`flex items-center justify-between p-2.5 rounded-[8px] border ${
                       cat.archived
-                        ? "bg-[#FAF9F6] border-[#D3D1C7] text-[#888780] opacity-60"
-                        : "bg-[#FAF9F6] border-[#D3D1C7] text-[#2C2C2A]"
+                        ? "bg-[#FAF9F6] border-[#D3D1C7] opacity-60"
+                        : "bg-[#FAF9F6] border-[#D3D1C7]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -344,21 +494,50 @@ export default function AdminClient({
                       )}
                     </div>
 
-                    <button
-                      onClick={() =>
-                        startTransition(() =>
-                          toggleArchiveCategory(cat.id, cat.archived)
-                        )
-                      }
-                      title={cat.archived ? "desarquivar" : "arquivar"}
-                      className="p-1.5 text-[#5F5E5A] hover:text-[#712B13] hover:bg-[#EFECE6] rounded-[6px] transition-colors"
-                    >
-                      {cat.archived ? (
-                        <ArchiveRestore className="w-3.5 h-3.5 text-emerald-600" />
-                      ) : (
-                        <Archive className="w-3.5 h-3.5" />
-                      )}
-                    </button>
+                    <div className="flex items-center gap-1">
+                      {/* Edit button */}
+                      <button
+                        onClick={() =>
+                          setEditingItem({
+                            id: cat.id,
+                            type: "category",
+                            name: cat.name,
+                            color: cat.color,
+                            textColor: cat.textColor || "",
+                          })
+                        }
+                        title="editar"
+                        className="p-1.5 text-[#5F5E5A] hover:text-[#712B13] hover:bg-[#EFECE6] rounded-[6px] transition-colors"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Archive button */}
+                      <button
+                        onClick={() =>
+                          startTransition(() =>
+                            toggleArchiveCategory(cat.id, cat.archived)
+                          )
+                        }
+                        title={cat.archived ? "desarquivar" : "arquivar"}
+                        className="p-1.5 text-[#5F5E5A] hover:text-[#712B13] hover:bg-[#EFECE6] rounded-[6px] transition-colors"
+                      >
+                        {cat.archived ? (
+                          <ArchiveRestore className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : (
+                          <Archive className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      {/* Delete button */}
+                      <button
+                        onClick={() => handleDeleteItem(cat.id, "category", cat.name)}
+                        title="excluir permanentemente"
+                        className="p-1.5 text-[#5F5E5A] hover:text-rose-600 hover:bg-rose-50 rounded-[6px] transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 );
               })
@@ -366,6 +545,145 @@ export default function AdminClient({
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {editingItem && (
+        <div className="fixed inset-0 z-50 bg-[#2C2C2A]/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-6 max-w-md w-full shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[#D3D1C7] pb-3">
+              <h3 className="font-serif text-base font-medium text-[#2C2C2A] capitalize">
+                editar {editingItem.type === "context" ? "contexto" : "categoria"}
+              </h3>
+              <button
+                onClick={() => setEditingItem(null)}
+                className="text-[#5F5E5A] hover:text-[#2C2C2A]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-[#2C2C2A] mb-1">
+                  nome
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editingItem.name}
+                  onChange={(e) =>
+                    setEditingItem({ ...editingItem, name: e.target.value })
+                  }
+                  className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
+                />
+              </div>
+
+              {/* Background Color Family / Custom */}
+              <div>
+                <label className="block text-xs font-medium text-[#2C2C2A] mb-1.5">
+                  cor do fundo
+                </label>
+                <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                  {CHIP_FAMILIES.map((fam) => (
+                    <button
+                      key={fam.id}
+                      type="button"
+                      title={fam.name}
+                      onClick={() =>
+                        setEditingItem({ ...editingItem, color: fam.id })
+                      }
+                      style={{
+                        backgroundColor:
+                          editingItem.type === "context" ? fam.light.bg : fam.medium.bg,
+                      }}
+                      className={`w-5 h-5 rounded-[4px] border transition-transform flex items-center justify-center ${
+                        editingItem.color === fam.id
+                          ? "ring-2 ring-[#712B13] scale-110"
+                          : "opacity-80 hover:opacity-100"
+                      }`}
+                    >
+                      {editingItem.color === fam.id && <Check className="w-3 h-3 text-[#2C2C2A]" />}
+                    </button>
+                  ))}
+
+                  <label
+                    title="cor personalizada do fundo"
+                    className="w-5 h-5 rounded-[4px] border border-[#D3D1C7] bg-[#FAF9F6] cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
+                  >
+                    <Pipette className="w-3 h-3 text-[#5F5E5A]" />
+                    <input
+                      type="color"
+                      value={editingItem.color.startsWith("#") ? editingItem.color : "#F5C4B3"}
+                      onChange={(e) =>
+                        setEditingItem({ ...editingItem, color: e.target.value })
+                      }
+                      className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Font Text Color */}
+              <div>
+                <label className="block text-xs font-medium text-[#2C2C2A] mb-1.5">
+                  cor da fonte (texto)
+                </label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 cursor-pointer bg-[#FAF9F6] border border-[#D3D1C7] px-2.5 py-1 rounded-[6px] text-xs text-[#2C2C2A]">
+                    <input
+                      type="color"
+                      value={editingItem.textColor || "#4A1B0C"}
+                      onChange={(e) =>
+                        setEditingItem({ ...editingItem, textColor: e.target.value })
+                      }
+                      className="w-4 h-4 rounded cursor-pointer border-none bg-transparent"
+                    />
+                    <span>{editingItem.textColor ? editingItem.textColor : "automático (família)"}</span>
+                  </label>
+                  {editingItem.textColor && (
+                    <button
+                      type="button"
+                      onClick={() => setEditingItem({ ...editingItem, textColor: "" })}
+                      className="text-xs text-[#5F5E5A] hover:text-[#712B13]"
+                    >
+                      restaurar automático
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Live Preview Chip */}
+              <div className="pt-2">
+                <span className="block text-[11px] text-[#5F5E5A] mb-1">pré-visualização:</span>
+                <span
+                  className="px-3 py-1 rounded-[8px] text-xs font-medium border inline-block"
+                  style={getChipStyle(editingItem.color, editingItem.type, editingItem.textColor)}
+                >
+                  {editingItem.name || "nome da tag"}
+                </span>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#D3D1C7]">
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  className="px-3.5 py-1.5 rounded-[6px] text-xs text-[#5F5E5A] hover:text-[#2C2C2A] bg-[#FAF9F6] border border-[#D3D1C7]"
+                >
+                  cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="border border-[#712B13] text-[#712B13] hover:bg-[#712B13]/10 font-medium px-4 py-1.5 rounded-[6px] text-xs transition-colors disabled:opacity-50"
+                >
+                  salvar alterações
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

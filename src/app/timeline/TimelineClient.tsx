@@ -215,7 +215,7 @@ export default function TimelineClient({
                     {entry.context && (
                       <span
                         className="text-xs font-medium px-2.5 py-0.5 rounded-[8px] border"
-                        style={getChipStyle(entry.context.color, "context")}
+                        style={getChipStyle(entry.context.color, "context", entry.context.textColor)}
                       >
                         {entry.context.name}
                       </span>
@@ -226,7 +226,7 @@ export default function TimelineClient({
                       <span
                         key={ec.category.id}
                         className="text-xs font-medium px-2.5 py-0.5 rounded-[8px] border"
-                        style={getChipStyle(ec.category.color, "category")}
+                        style={getChipStyle(ec.category.color, "category", ec.category.textColor)}
                       >
                         {ec.category.name}
                       </span>
