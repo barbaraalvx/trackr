@@ -8,7 +8,7 @@ import {
   toggleArchiveCategory,
   updateRequireConfirmation,
 } from "./actions";
-import { Plus, Archive, ArchiveRestore, Settings2, Tag, FolderKanban, Check } from "lucide-react";
+import { Plus, Archive, ArchiveRestore, Settings2, Tag, FolderKanban, Check, Pipette } from "lucide-react";
 
 interface AdminClientProps {
   initialContexts: any[];
@@ -98,22 +98,33 @@ export default function AdminClient({
           </div>
         </div>
 
-        <label className="flex items-center gap-3.5 p-3.5 bg-slate-950/60 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-          <input
-            type="checkbox"
-            checked={requireConfirm}
-            onChange={(e) => handleToggleSetting(e.target.checked)}
-            className="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-950 bg-slate-900"
-          />
-          <div>
-            <span className="text-sm font-medium text-slate-200">
+        {/* Toggle Switch */}
+        <div className="flex items-center justify-between p-4 bg-slate-950/60 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors">
+          <div className="pr-4">
+            <span className="text-sm font-medium text-slate-200 block">
               Revisar itens com títulos gerados por IA antes de salvar
             </span>
             <p className="text-xs text-slate-400 mt-0.5">
               Quando ativo, abre um modal de confirmação para validar/editar os títulos gerados pela IA antes de gravar no banco de dados.
             </p>
           </div>
-        </label>
+
+          <button
+            type="button"
+            role="switch"
+            aria-checked={requireConfirm}
+            onClick={() => handleToggleSetting(!requireConfirm)}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              requireConfirm ? "bg-indigo-600" : "bg-slate-800"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                requireConfirm ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -151,8 +162,8 @@ export default function AdminClient({
               </button>
             </div>
 
-            {/* Color selector */}
-            <div className="flex items-center gap-2">
+            {/* Color selector with presets + custom picker */}
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] text-slate-400">Cor:</span>
               <div className="flex items-center gap-1.5">
                 {colorPresets.map((c) => (
@@ -168,6 +179,23 @@ export default function AdminClient({
                     {contextColor === c && <Check className="w-3 h-3 text-white" />}
                   </button>
                 ))}
+
+                {/* Custom Color Picker */}
+                <label
+                  title="Escolher cor personalizada"
+                  className="w-5 h-5 rounded-full border border-slate-700 bg-slate-900 cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
+                  style={{
+                    backgroundColor: colorPresets.includes(contextColor) ? undefined : contextColor,
+                  }}
+                >
+                  <Pipette className="w-3 h-3 text-slate-300" />
+                  <input
+                    type="color"
+                    value={contextColor}
+                    onChange={(e) => setContextColor(e.target.value)}
+                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                  />
+                </label>
               </div>
             </div>
           </form>
@@ -256,8 +284,8 @@ export default function AdminClient({
               </button>
             </div>
 
-            {/* Color selector */}
-            <div className="flex items-center gap-2">
+            {/* Color selector with presets + custom picker */}
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] text-slate-400">Cor:</span>
               <div className="flex items-center gap-1.5">
                 {colorPresets.map((c) => (
@@ -273,6 +301,23 @@ export default function AdminClient({
                     {categoryColor === c && <Check className="w-3 h-3 text-white" />}
                   </button>
                 ))}
+
+                {/* Custom Color Picker */}
+                <label
+                  title="Escolher cor personalizada"
+                  className="w-5 h-5 rounded-full border border-slate-700 bg-slate-900 cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
+                  style={{
+                    backgroundColor: colorPresets.includes(categoryColor) ? undefined : categoryColor,
+                  }}
+                >
+                  <Pipette className="w-3 h-3 text-slate-300" />
+                  <input
+                    type="color"
+                    value={categoryColor}
+                    onChange={(e) => setCategoryColor(e.target.value)}
+                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                  />
+                </label>
               </div>
             </div>
           </form>
