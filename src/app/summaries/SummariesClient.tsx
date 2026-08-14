@@ -20,9 +20,15 @@ interface SummariesClientProps {
 }
 
 export default function SummariesClient({ contextsList }: SummariesClientProps) {
-  const [periodType, setPeriodType] = useState<"daily" | "weekly" | "biweekly" | "monthly">("weekly");
+  const [periodType, setPeriodType] = useState<"daily" | "weekly" | "biweekly" | "monthly" | "custom">("weekly");
   const [contextId, setContextId] = useState("");
   const [referenceDate, setReferenceDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [customStartDate, setCustomStartDate] = useState(
+    new Date(Date.now() - 14 * 86400000).toISOString().split("T")[0]
+  );
+  const [customEndDate, setCustomEndDate] = useState(
     new Date().toISOString().split("T")[0]
   );
 
@@ -39,17 +45,20 @@ export default function SummariesClient({ contextsList }: SummariesClientProps) 
         periodType,
         contextId: contextId || undefined,
         referenceDate,
+        customStartDate: periodType === "custom" ? customStartDate : undefined,
+        customEndDate: periodType === "custom" ? customEndDate : undefined,
         forceRegenerate,
       });
       setSummaryData(res);
     });
   };
 
-  const periodOptions: { id: "daily" | "weekly" | "biweekly" | "monthly"; label: string }[] = [
+  const periodOptions: { id: "daily" | "weekly" | "biweekly" | "monthly" | "custom"; label: string }[] = [
     { id: "daily", label: "Diário" },
     { id: "weekly", label: "Semanal" },
     { id: "biweekly", label: "Quinzenal" },
     { id: "monthly", label: "Mensal" },
+    { id: "custom", label: "Sprint / Personalizado" },
   ];
 
   return (
@@ -58,13 +67,13 @@ export default function SummariesClient({ contextsList }: SummariesClientProps) 
       <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           {/* Period type selector */}
-          <div className="flex bg-slate-950/80 p-1 rounded-xl border border-slate-800">
+          <div className="flex bg-slate-950/80 p-1 rounded-xl border border-slate-800 flex-wrap">
             {periodOptions.map((opt) => (
               <button
                 key={opt.id}
                 type="button"
                 onClick={() => setPeriodType(opt.id)}
-                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   periodType === opt.id
                     ? "bg-indigo-600 text-white shadow-sm"
                     : "text-slate-400 hover:text-slate-200"
@@ -93,15 +102,35 @@ export default function SummariesClient({ contextsList }: SummariesClientProps) 
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
-              <input
-                type="date"
-                value={referenceDate}
-                onChange={(e) => setReferenceDate(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
+            {periodType !== "custom" ? (
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
+                <input
+                  type="date"
+                  value={referenceDate}
+                  onChange={(e) => setReferenceDate(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
+                <span className="text-xs text-slate-400">De:</span>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                />
+                <span className="text-xs text-slate-400">Até:</span>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -120,7 +149,7 @@ export default function SummariesClient({ contextsList }: SummariesClientProps) 
           ) : (
             <>
               <Sparkles className="w-4 h-4 text-emerald-300" />
-              <span>Gerar Resumo do Período</span>
+              <span>Gerar Resumo da Sprint / Período</span>
             </>
           )}
         </button>
@@ -210,7 +239,7 @@ export default function SummariesClient({ contextsList }: SummariesClientProps) 
             <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
               <Sparkles className="w-5 h-5 text-emerald-400" />
               <h2 className="text-base font-bold text-slate-100">
-                Resumo Narrativo do Período
+                Resumo Narrativo da Sprint / Período
               </h2>
             </div>
 

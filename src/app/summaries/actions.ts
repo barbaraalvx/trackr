@@ -8,14 +8,18 @@ import { generateSummaryWithGemini, GroupedDayData } from "@/lib/ai/summary-gene
 import { revalidatePath } from "next/cache";
 
 export async function getOrGenerateSummary(params: {
-  periodType: "daily" | "weekly" | "biweekly" | "monthly";
+  periodType: "daily" | "weekly" | "biweekly" | "monthly" | "custom";
   contextId?: string;
   referenceDate?: string;
+  customStartDate?: string;
+  customEndDate?: string;
   forceRegenerate?: boolean;
 }) {
   const { periodStart, periodEnd, isClosedPeriod } = calculatePeriodDates(
     params.periodType,
-    params.referenceDate
+    params.referenceDate,
+    params.customStartDate,
+    params.customEndDate
   );
 
   const contextId = params.contextId || null;

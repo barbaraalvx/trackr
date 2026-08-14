@@ -24,6 +24,7 @@ export const periodTypeEnum = pgEnum("period_type", [
   "weekly",
   "biweekly",
   "monthly",
+  "custom",
 ]);
 
 // 1. contexts (Indicium, Pessoal, Estudos...)
