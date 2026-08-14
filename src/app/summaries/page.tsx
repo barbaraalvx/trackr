@@ -5,13 +5,13 @@ export default async function SummariesPage() {
   const contextsList = await getContexts();
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 font-sans">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-100">
-          Resumos & Insights com IA
+        <h1 className="font-serif text-2xl sm:text-3xl font-medium text-[#2C2C2A]">
+          resumos & insights com ia
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Gere sínteses narrativas, métricas e análises do seu trabalho por período
+        <p className="text-sm text-[#5F5E5A] mt-1">
+          gere sínteses narrativas, métricas e análises do seu trabalho por período
         </p>
       </div>
 

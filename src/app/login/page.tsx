@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { LogIn, Mail, Lock, Sparkles, CheckCircle2, AlertCircle } from "lucide-react";
+import { LogIn, Mail, Lock, Layers, CheckCircle2, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -31,7 +31,7 @@ export default function LoginPage() {
         if (error) throw error;
         setMessage({
           type: "success",
-          text: "Magic link enviado para o seu e-mail! Verifique sua caixa de entrada.",
+          text: "magic link enviado para o seu e-mail! verifique sua caixa de entrada.",
         });
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -39,7 +39,6 @@ export default function LoginPage() {
           password,
         });
         if (error) {
-          // If user doesn't exist yet, try sign up for single user simplicity
           const { error: signUpError } = await supabase.auth.signUp({
             email,
             password,
@@ -47,7 +46,7 @@ export default function LoginPage() {
           if (signUpError) throw signUpError;
           setMessage({
             type: "success",
-            text: "Conta criada com sucesso! Você já pode navegar ou confirmar pelo e-mail.",
+            text: "conta criada com sucesso! você já pode navegar ou confirmar pelo e-mail.",
           });
           router.push("/");
           router.refresh();
@@ -59,7 +58,7 @@ export default function LoginPage() {
     } catch (err: any) {
       setMessage({
         type: "error",
-        text: err.message || "Erro ao realizar autenticação.",
+        text: err.message || "erro ao realizar autenticação.",
       });
     } finally {
       setLoading(false);
@@ -67,58 +66,52 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Gradients */}
-      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl relative z-10">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#2C2C2A] flex items-center justify-center p-4 relative font-sans">
+      <div className="w-full max-w-md bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-8 shadow-sm relative z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-emerald-400 p-0.5 mb-4 shadow-lg shadow-indigo-500/20">
-            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-              <Sparkles className="w-7 h-7 text-emerald-400" />
-            </div>
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-[8px] bg-[#712B13]/10 border border-[#712B13]/20 mb-3">
+            <Layers className="w-6 h-6 text-[#712B13]" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            Trackr
+          <h1 className="font-serif text-3xl font-medium text-[#2C2C2A]">
+            trackr
           </h1>
-          <p className="text-sm text-slate-400 mt-2">
-            Registro diário de atividades potencializado por IA
+          <p className="text-xs text-[#5F5E5A] mt-1.5 font-sans">
+            registro diário de atividades potencializado por ia
           </p>
         </div>
 
         {/* Tab Toggle */}
-        <div className="flex bg-slate-950/60 p-1 rounded-xl mb-6 border border-slate-800">
+        <div className="flex bg-[#FAF9F6] p-1 rounded-[8px] mb-6 border border-[#D3D1C7]">
           <button
             type="button"
             onClick={() => { setMode("password"); setMessage(null); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+            className={`flex-1 py-1.5 text-xs font-medium rounded-[6px] transition-all ${
               mode === "password"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-[#712B13] text-white shadow-sm"
+                : "text-[#5F5E5A] hover:text-[#2C2C2A]"
             }`}
           >
-            Email & Senha
+            email & senha
           </button>
           <button
             type="button"
             onClick={() => { setMode("magic_link"); setMessage(null); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+            className={`flex-1 py-1.5 text-xs font-medium rounded-[6px] transition-all ${
               mode === "magic_link"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-[#712B13] text-white shadow-sm"
+                : "text-[#5F5E5A] hover:text-[#2C2C2A]"
             }`}
           >
-            Magic Link
+            magic link
           </button>
         </div>
 
         {message && (
           <div
-            className={`p-3.5 rounded-xl mb-6 text-xs flex items-start gap-2.5 border ${
+            className={`p-3 rounded-[6px] mb-6 text-xs flex items-start gap-2 border ${
               message.type === "success"
-                ? "bg-emerald-950/50 border-emerald-800/80 text-emerald-300"
-                : "bg-rose-950/50 border-rose-800/80 text-rose-300"
+                ? "bg-[#C0DD97]/30 border-[#97C459] text-[#173404]"
+                : "bg-[#F5C4B3]/30 border-[#F0997B] text-[#4A1B0C]"
             }`}
           >
             {message.type === "success" ? (
@@ -132,36 +125,36 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              E-mail
+            <label className="block text-xs font-medium text-[#2C2C2A] mb-1.5">
+              e-mail
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Mail className="w-4 h-4 text-[#888780] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu.email@exemplo.com"
-                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] py-2 pl-9 pr-4 text-xs sm:text-sm text-[#2C2C2A] placeholder:text-[#888780] focus:outline-none focus:border-[#712B13]"
               />
             </div>
           </div>
 
           {mode === "password" && (
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                Senha
+              <label className="block text-xs font-medium text-[#2C2C2A] mb-1.5">
+                senha
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-[#888780] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                  className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] py-2 pl-9 pr-4 text-xs sm:text-sm text-[#2C2C2A] placeholder:text-[#888780] focus:outline-none focus:border-[#712B13]"
                 />
               </div>
             </div>
@@ -170,14 +163,14 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-medium py-2.5 rounded-xl text-sm shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            className="w-full border border-[#712B13] text-[#712B13] hover:bg-[#712B13]/10 font-medium py-2.5 rounded-[6px] text-xs sm:text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
           >
             {loading ? (
-              <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-[#712B13] border-t-transparent" />
             ) : (
               <>
                 <LogIn className="w-4 h-4" />
-                <span>{mode === "magic_link" ? "Enviar Link Mágico" : "Entrar / Cadastrar"}</span>
+                <span>{mode === "magic_link" ? "enviar link mágico" : "entrar / cadastrar"}</span>
               </>
             )}
           </button>
