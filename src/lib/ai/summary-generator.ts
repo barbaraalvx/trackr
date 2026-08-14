@@ -43,7 +43,29 @@ export async function generateSummaryWithGemini(
   try {
     const ai = new GoogleGenAI({ apiKey });
 
-    const prompt = `Você vai receber os registros estruturados de atividades de um período de trabalho (${periodType}: ${periodStart} até ${periodEnd}), agrupados por dia.
+  const isSingleDay = periodStart === periodEnd;
+
+  const prompt = isSingleDay
+    ? `Você vai receber os registros de atividades de UM único dia de trabalho (${periodStart}).
+
+Sua tarefa é gerar um resumo CURTO e OBJETIVO, no estilo de uma anotação de stand-up. Seja conciso — não repita o que já está óbvio nos dados. Foque em:
+- O que foi entregue e qual foi o impacto ou valor gerado (ex: "bug corrigido que afetava clientes", "feature entregue que desbloqueou o time")
+- Algum bloqueio que merece atenção
+- Se o dia foi produtivo ou não, com uma frase explicativa
+
+Formato da resposta — curto, sem rodeios:
+{
+  "summary": "3-5 frases máximo, direto ao ponto",
+  "insights": {
+    "went_well": "1-2 frases sobre o que funcionou ou gerou valor",
+    "gaps": "1 frase sobre o que ficou pendente ou poderia melhorar",
+    "blockers_notes": "1 frase (ou 'Nenhum bloqueio registrado')"
+  }
+}
+
+Dados do dia:
+${JSON.stringify(groupedData, null, 2)}`
+    : `Você vai receber os registros estruturados de atividades de um período de trabalho (${periodType}: ${periodStart} até ${periodEnd}), agrupados por dia.
 
 Sua tarefa é gerar:
 1. Um resumo narrativo em português, em Markdown corrido, cobrindo:
