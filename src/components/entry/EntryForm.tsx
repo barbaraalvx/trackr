@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { processAndPrepareEntry, saveEntry, ItemWithTitle, ArtifactInput } from "@/app/actions/entry-actions";
+import { getChipStyle } from "@/lib/constants/chip-colors";
 import {
   PenSquare,
   Sparkles,
@@ -145,39 +146,39 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
     setArtifactsList([]);
   };
 
-  const typeLabels: Record<string, { label: string; color: string }> = {
-    done_today: { label: "Feito hoje", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-    plan_tomorrow: { label: "Planejado amanhã", color: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" },
-    blocker: { label: "Bloqueio", color: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
-    comment: { label: "Comentário", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  const typeLabels: Record<string, { label: string; colorClass: string }> = {
+    done_today: { label: "feito hoje", colorClass: "bg-emerald-50 text-emerald-800 border-emerald-200" },
+    plan_tomorrow: { label: "planejado amanhã", colorClass: "bg-blue-50 text-blue-800 border-blue-200" },
+    blocker: { label: "bloqueio", colorClass: "bg-rose-50 text-rose-800 border-rose-200" },
+    comment: { label: "comentário", colorClass: "bg-amber-50 text-amber-800 border-amber-200" },
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-12">
+    <div className="space-y-6 max-w-4xl mx-auto pb-12 font-sans">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 flex items-center gap-2.5">
-            <PenSquare className="w-7 h-7 text-indigo-400" />
-            Nova Entrada de Log
+          <h1 className="font-serif text-2xl sm:text-3xl font-medium text-[#2C2C2A] flex items-center gap-2.5">
+            <PenSquare className="w-6 h-6 text-[#712B13]" />
+            nova entrada de log
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Digite suas atividades em texto livre com suporte a Markdown. A IA nomeará e organizará os itens.
+          <p className="text-sm text-[#5F5E5A] mt-1 font-sans">
+            digite suas atividades em texto livre com suporte a markdown. a ia nomeará e organizará os itens.
           </p>
         </div>
       </div>
 
       {savedSuccess && (
-        <div className="p-4 bg-emerald-950/60 border border-emerald-800/80 text-emerald-300 rounded-2xl flex items-center justify-between shadow-lg shadow-emerald-950/20">
+        <div className="p-4 bg-[#C0DD97]/30 border border-[#97C459] text-[#173404] rounded-[8px] flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-            <span className="text-sm font-medium">
-              Entrada salva com sucesso! Você pode visualizar na Timeline ou gerar Resumos.
+            <CheckCircle2 className="w-5 h-5 text-[#173404] shrink-0" />
+            <span className="text-xs sm:text-sm font-medium">
+              entrada salva com sucesso! você pode visualizar na timeline ou gerar resumos.
             </span>
           </div>
           <button
             onClick={() => setSavedSuccess(false)}
-            className="text-emerald-400 hover:text-emerald-200 p-1"
+            className="text-[#173404] hover:opacity-75 p-1"
           >
             <X className="w-4 h-4" />
           </button>
@@ -186,33 +187,33 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 1. Data da Entrada & Contexto */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-5 shadow-sm">
           {/* Date picker */}
           <div>
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-2">
-              <Calendar className="w-4 h-4 text-indigo-400" />
-              1. Data da Entrada
+            <label className="flex items-center gap-2 text-xs font-medium text-[#2C2C2A] mb-2">
+              <Calendar className="w-4 h-4 text-[#712B13]" />
+              1. data da entrada
             </label>
             <input
               type="date"
               value={entryDate}
               onChange={(e) => setEntryDate(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3.5 py-2 text-xs sm:text-sm text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             />
           </div>
 
           {/* Context dropdown */}
           <div>
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-2">
-              <FolderKanban className="w-4 h-4 text-indigo-400" />
-              Contexto (Projeto)
+            <label className="flex items-center gap-2 text-xs font-medium text-[#2C2C2A] mb-2">
+              <FolderKanban className="w-4 h-4 text-[#712B13]" />
+              contexto (projeto)
             </label>
             <select
               value={contextId}
               onChange={(e) => setContextId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3.5 py-2 text-xs sm:text-sm text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             >
-              <option value="">Selecione um contexto (opcional)</option>
+              <option value="">selecione um contexto (opcional)</option>
               {contextsList
                 .filter((c) => !c.archived)
                 .map((ctx) => (
@@ -225,16 +226,16 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
         </div>
 
         {/* 2. O que fiz hoje? */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
+        <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-semibold text-emerald-400">
-              2. O que fiz hoje? <span className="text-xs font-normal text-slate-400">(um item por linha)</span>
+            <label className="text-xs sm:text-sm font-medium text-[#2C2C2A]">
+              2. o que fiz hoje? <span className="text-xs font-normal text-[#5F5E5A]">(um item por linha)</span>
             </label>
             <div className="flex items-center gap-1">
-              <button type="button" onClick={() => insertMarkdown(setDoneToday, "**", "**")} title="Negrito" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Bold className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => insertMarkdown(setDoneToday, "*", "*")} title="Itálico" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Italic className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => insertMarkdown(setDoneToday, "`", "`")} title="Código" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Code className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => insertMarkdown(setDoneToday, "- ")} title="Lista" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><List className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setDoneToday, "**", "**")} title="Negrito" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Bold className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setDoneToday, "*", "*")} title="Itálico" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Italic className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setDoneToday, "`", "`")} title="Código" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Code className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setDoneToday, "- ")} title="Lista" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><List className="w-3.5 h-3.5" /></button>
             </div>
           </div>
           <textarea
@@ -242,21 +243,21 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
             value={doneToday}
             onChange={(e) => setDoneToday(e.target.value)}
             placeholder="- Corrigido **bug de renderização** no dashboard&#10;- Implementada integração com `API` de pagamentos&#10;- Reunião de alinhamento com equipe"
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition-colors font-mono text-xs sm:text-sm"
+            className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] p-3 text-xs sm:text-sm text-[#2C2C2A] placeholder:text-[#888780] focus:outline-none focus:border-[#712B13] transition-colors font-mono"
           />
         </div>
 
         {/* 3. O que vou fazer amanhã? */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
+        <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-semibold text-indigo-400">
-              3. O que vou fazer amanhã? <span className="text-xs font-normal text-slate-400">(um item por linha)</span>
+            <label className="text-xs sm:text-sm font-medium text-[#2C2C2A]">
+              3. o que vou fazer amanhã? <span className="text-xs font-normal text-[#5F5E5A]">(um item por linha)</span>
             </label>
             <div className="flex items-center gap-1">
-              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "**", "**")} title="Negrito" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Bold className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "*", "*")} title="Itálico" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Italic className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "`", "`")} title="Código" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Code className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "- ")} title="Lista" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><List className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "**", "**")} title="Negrito" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Bold className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "*", "*")} title="Itálico" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Italic className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "`", "`")} title="Código" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Code className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setPlanTomorrow, "- ")} title="Lista" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><List className="w-3.5 h-3.5" /></button>
             </div>
           </div>
           <textarea
@@ -264,20 +265,20 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
             value={planTomorrow}
             onChange={(e) => setPlanTomorrow(e.target.value)}
             placeholder="- Finalizar testes unitários do módulo **X**&#10;- Documentar `endpoints` da API"
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition-colors font-mono text-xs sm:text-sm"
+            className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] p-3 text-xs sm:text-sm text-[#2C2C2A] placeholder:text-[#888780] focus:outline-none focus:border-[#712B13] transition-colors font-mono"
           />
         </div>
 
         {/* 4. Bloqueios / Impedimentos */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
+        <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-semibold text-rose-400">
-              4. Bloqueios / Impedimentos <span className="text-xs font-normal text-slate-400">(opcional, um item por linha)</span>
+            <label className="text-xs sm:text-sm font-medium text-[#2C2C2A]">
+              4. bloqueios / impedimentos <span className="text-xs font-normal text-[#5F5E5A]">(opcional, um item por linha)</span>
             </label>
             <div className="flex items-center gap-1">
-              <button type="button" onClick={() => insertMarkdown(setBlockers, "**", "**")} title="Negrito" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Bold className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => insertMarkdown(setBlockers, "*", "*")} title="Itálico" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Italic className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => insertMarkdown(setBlockers, "`", "`")} title="Código" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Code className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setBlockers, "**", "**")} title="Negrito" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Bold className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setBlockers, "*", "*")} title="Itálico" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Italic className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setBlockers, "`", "`")} title="Código" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Code className="w-3.5 h-3.5" /></button>
             </div>
           </div>
           <textarea
@@ -285,19 +286,19 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
             value={blockers}
             onChange={(e) => setBlockers(e.target.value)}
             placeholder="- Aguardando credenciais do ambiente de `homologação`"
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-rose-500 transition-colors font-mono text-xs sm:text-sm"
+            className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] p-3 text-xs sm:text-sm text-[#2C2C2A] placeholder:text-[#888780] focus:outline-none focus:border-[#712B13] transition-colors font-mono"
           />
         </div>
 
         {/* 5. Comentários Extra */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-2">
+        <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-semibold text-amber-400">
-              5. Comentários Extra <span className="text-xs font-normal text-slate-400">(opcional)</span>
+            <label className="text-xs sm:text-sm font-medium text-[#2C2C2A]">
+              5. comentários extra <span className="text-xs font-normal text-[#5F5E5A]">(opcional)</span>
             </label>
             <div className="flex items-center gap-1">
-              <button type="button" onClick={() => insertMarkdown(setComments, "**", "**")} title="Negrito" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Bold className="w-3.5 h-3.5" /></button>
-              <button type="button" onClick={() => insertMarkdown(setComments, "*", "*")} title="Itálico" className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded"><Italic className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setComments, "**", "**")} title="Negrito" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Bold className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => insertMarkdown(setComments, "*", "*")} title="Itálico" className="p-1 text-[#5F5E5A] hover:text-[#2C2C2A] hover:bg-[#FAF9F6] rounded-[6px]"><Italic className="w-3.5 h-3.5" /></button>
             </div>
           </div>
           <textarea
@@ -305,30 +306,30 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
             value={comments}
             onChange={(e) => setComments(e.target.value)}
             placeholder="- Boa evolução na sprint hoje; impedimento do backend resolvido"
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-amber-500 transition-colors font-mono text-xs sm:text-sm"
+            className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] p-3 text-xs sm:text-sm text-[#2C2C2A] placeholder:text-[#888780] focus:outline-none focus:border-[#712B13] transition-colors font-mono"
           />
         </div>
 
         {/* 6. Artefatos / Links */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-3">
+        <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-              <Link2 className="w-4 h-4 text-indigo-400" />
-              6. Artefatos / Links <span className="text-slate-500 font-normal">(PRs, Docs, Figma, etc.)</span>
+            <label className="flex items-center gap-2 text-xs font-medium text-[#2C2C2A]">
+              <Link2 className="w-4 h-4 text-[#712B13]" />
+              6. artefatos / links <span className="text-[#5F5E5A] font-normal">(PRs, Docs, Figma, etc.)</span>
             </label>
             <button
               type="button"
               onClick={handleAddArtifact}
-              className="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-indigo-950/60 px-2.5 py-1 rounded-lg border border-indigo-900/60 transition-colors"
+              className="text-xs font-medium text-[#712B13] hover:bg-[#712B13]/10 flex items-center gap-1 px-2.5 py-1 rounded-[6px] border border-[#712B13]/30 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              Adicionar Artefato
+              adicionar artefato
             </button>
           </div>
 
           {artifactsList.length === 0 ? (
-            <p className="text-xs text-slate-500 italic">
-              Nenhum artefato adicionado. Clique no botão acima para vincular PRs ou documentos.
+            <p className="text-xs text-[#888780] italic">
+              nenhum artefato adicionado. clique no botão acima para vincular PRs ou documentos.
             </p>
           ) : (
             <div className="space-y-2">
@@ -340,8 +341,8 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
                     onChange={(e) =>
                       handleUpdateArtifact(idx, "label", e.target.value)
                     }
-                    placeholder="Rótulo (ex: PR #123)"
-                    className="w-1/3 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                    placeholder="rótulo (ex: PR #123)"
+                    className="w-1/3 bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-2 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
                   />
                   <input
                     type="url"
@@ -351,12 +352,12 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
                       handleUpdateArtifact(idx, "url", e.target.value)
                     }
                     placeholder="https://github.com/..."
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                    className="flex-1 bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-2 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
                   />
                   <button
                     type="button"
                     onClick={() => handleRemoveArtifact(idx)}
-                    className="p-2 text-slate-500 hover:text-rose-400 rounded-lg transition-colors"
+                    className="p-2 text-[#5F5E5A] hover:text-rose-600 rounded-[6px] transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -367,40 +368,35 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
         </div>
 
         {/* 7. Categorias do dia (Tags) */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm">
-          <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 mb-3">
-            <Tag className="w-4 h-4 text-emerald-400" />
-            7. Categorias do Dia (Tags)
+        <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-5 shadow-sm">
+          <label className="flex items-center gap-2 text-xs font-medium text-[#2C2C2A] mb-3">
+            <Tag className="w-4 h-4 text-[#712B13]" />
+            7. categorias do dia (tags)
           </label>
           <div className="flex flex-wrap gap-2">
             {categoriesList.filter((c) => !c.archived).length === 0 ? (
-              <p className="text-xs text-slate-500">
-                Nenhuma categoria cadastrada. Cadastre em Admin.
+              <p className="text-xs text-[#888780]">
+                nenhuma categoria cadastrada. cadastre em admin.
               </p>
             ) : (
               categoriesList
                 .filter((c) => !c.archived)
                 .map((cat) => {
                   const isSelected = selectedCategoryIds.includes(cat.id);
+                  const chipStyle = getChipStyle(cat.color, "category");
                   return (
                     <button
                       key={cat.id}
                       type="button"
                       onClick={() => handleToggleCategory(cat.id)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all flex items-center gap-2 ${
+                      className={`px-3 py-1 rounded-[8px] text-xs font-medium border transition-all ${
                         isSelected
-                          ? "bg-slate-800 text-slate-100 shadow-sm"
-                          : "bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700"
+                          ? "ring-2 ring-[#712B13] ring-offset-1 shadow-sm font-semibold"
+                          : "opacity-80 hover:opacity-100"
                       }`}
-                      style={{
-                        borderColor: isSelected ? cat.color : undefined,
-                      }}
+                      style={chipStyle}
                     >
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: cat.color }}
-                      />
-                      <span>{cat.name}</span>
+                      {cat.name}
                     </button>
                   );
                 })
@@ -412,17 +408,17 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
         <button
           type="submit"
           disabled={isProcessing}
-          className="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-semibold py-3.5 rounded-2xl text-base shadow-xl shadow-indigo-600/20 transition-all flex items-center justify-center gap-2.5 disabled:opacity-50"
+          className="w-full border border-[#712B13] text-[#712B13] hover:bg-[#712B13]/10 font-medium py-3 rounded-[6px] text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isProcessing ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Processando itens com IA...</span>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>processando itens com ia...</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-5 h-5 text-emerald-300" />
-              <span>Gerar Títulos & Salvar Log</span>
+              <Sparkles className="w-4 h-4 text-[#712B13]" />
+              <span>gerar títulos & salvar log</span>
             </>
           )}
         </button>
@@ -430,35 +426,35 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
 
       {/* Review Modal */}
       {reviewModalOpen && preparedData && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-6 my-8">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="fixed inset-0 z-50 bg-[#2C2C2A]/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-6 sm:p-8 max-w-2xl w-full shadow-xl space-y-6 my-8">
+            <div className="flex items-center justify-between border-b border-[#D3D1C7] pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                  <Sparkles className="w-5 h-5 text-emerald-400" />
+                <div className="p-2 rounded-[6px] bg-[#712B13]/10 text-[#712B13] border border-[#712B13]/20">
+                  <Sparkles className="w-4 h-4 text-[#712B13]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-slate-100">
-                    Revisão dos Itens & Títulos
+                  <h2 className="font-serif text-lg font-medium text-[#2C2C2A]">
+                    revisão dos itens & títulos
                   </h2>
-                  <p className="text-xs text-slate-400">
-                    Confira ou edite os títulos gerados pela IA antes de salvar definitivamente.
+                  <p className="text-xs text-[#5F5E5A]">
+                    confira ou edite os títulos gerados pela ia antes de salvar definitivamente.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setReviewModalOpen(false)}
-                className="text-slate-400 hover:text-slate-200 p-1"
+                className="text-[#5F5E5A] hover:text-[#2C2C2A] p-1"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Items review list */}
             <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
               {preparedData.items.length === 0 ? (
-                <p className="text-xs text-slate-500 italic text-center py-4">
-                  Nenhum texto preenchido nos campos.
+                <p className="text-xs text-[#888780] italic text-center py-4">
+                  nenhum texto preenchido nos campos.
                 </p>
               ) : (
                 preparedData.items.map((item, idx) => {
@@ -466,11 +462,11 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
                   return (
                     <div
                       key={idx}
-                      className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 space-y-2"
+                      className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-4 space-y-2"
                     >
                       <div className="flex items-center justify-between">
                         <span
-                          className={`text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${typeBadge.color}`}
+                          className={`text-[10px] font-medium px-2 py-0.5 rounded-[6px] border ${typeBadge.colorClass}`}
                         >
                           {typeBadge.label}
                         </span>
@@ -478,20 +474,20 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
 
                       {/* Editable title */}
                       <div>
-                        <label className="block text-[11px] font-medium text-slate-400 mb-1 flex items-center gap-1">
-                          <Edit2 className="w-3 h-3 text-indigo-400" />
-                          Título Curto (IA / Editável):
+                        <label className="block text-[11px] font-medium text-[#5F5E5A] mb-1 flex items-center gap-1">
+                          <Edit2 className="w-3 h-3 text-[#712B13]" />
+                          título curto (ia / editável):
                         </label>
                         <input
                           type="text"
                           value={item.title}
                           onChange={(e) => handleTitleChange(idx, e.target.value)}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-medium focus:outline-none focus:border-indigo-500"
+                          className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] font-medium focus:outline-none focus:border-[#712B13]"
                         />
                       </div>
 
                       {/* Description */}
-                      <p className="text-xs text-slate-300 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/50">
+                      <p className="text-xs text-[#5F5E5A] bg-[#FFFFFF] p-2.5 rounded-[6px] border border-[#D3D1C7]">
                         {item.description}
                       </p>
                     </div>
@@ -501,26 +497,26 @@ export default function EntryForm({ contextsList, categoriesList }: EntryFormPro
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#D3D1C7]">
               <button
                 type="button"
                 onClick={() => setReviewModalOpen(false)}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 bg-slate-950 border border-slate-800 transition-colors"
+                className="px-4 py-2.5 rounded-[6px] text-xs font-medium text-[#5F5E5A] hover:text-[#2C2C2A] bg-[#FAF9F6] border border-[#D3D1C7] transition-colors"
               >
-                Voltar e Editar
+                voltar e editar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmSave}
                 disabled={isPending}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-50"
+                className="border border-[#712B13] text-[#712B13] hover:bg-[#712B13]/10 font-medium px-6 py-2.5 rounded-[6px] text-xs flex items-center gap-2 transition-all disabled:opacity-50"
               >
                 {isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="w-4 h-4 text-[#712B13]" />
                 )}
-                Confirmar & Salvar
+                confirmar & salvar
               </button>
             </div>
           </div>
