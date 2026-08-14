@@ -9,11 +9,11 @@ export default async function AdminPage() {
   return (
     <div className="space-y-8 pb-12">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-100">
-          Painel de Administração
+        <h1 className="font-serif text-2xl sm:text-3xl font-medium text-[#2C2C2A]">
+          painel de administração
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Gerencie seus contextos, categorias e preferências da aplicação
+        <p className="text-sm text-[#5F5E5A] mt-1 font-sans">
+          gerencie seus contextos, categorias e preferências da aplicação
         </p>
       </div>
 

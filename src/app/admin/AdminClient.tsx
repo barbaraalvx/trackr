@@ -8,6 +8,7 @@ import {
   toggleArchiveCategory,
   updateRequireConfirmation,
 } from "./actions";
+import { CHIP_FAMILIES, getChipStyle } from "@/lib/constants/chip-colors";
 import { Plus, Archive, ArchiveRestore, Settings2, Tag, FolderKanban, Check, Pipette } from "lucide-react";
 
 interface AdminClientProps {
@@ -15,17 +16,6 @@ interface AdminClientProps {
   initialCategories: any[];
   initialSettings: any;
 }
-
-const colorPresets = [
-  "#3b82f6", // blue
-  "#10b981", // emerald
-  "#8b5cf6", // purple
-  "#f59e0b", // amber
-  "#ec4899", // pink
-  "#06b6d4", // cyan
-  "#f97316", // orange
-  "#64748b", // slate
-];
 
 export default function AdminClient({
   initialContexts,
@@ -39,11 +29,11 @@ export default function AdminClient({
 
   // Context form
   const [contextName, setContextName] = useState("");
-  const [contextColor, setContextColor] = useState("#3b82f6");
+  const [contextColor, setContextColor] = useState(CHIP_FAMILIES[0].id);
 
   // Category form
   const [categoryName, setCategoryName] = useState("");
-  const [categoryColor, setCategoryColor] = useState("#10b981");
+  const [categoryColor, setCategoryColor] = useState(CHIP_FAMILIES[1].id);
 
   const handleToggleSetting = (checked: boolean) => {
     setRequireConfirm(checked);
@@ -81,31 +71,31 @@ export default function AdminClient({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans">
       {/* App Settings Card */}
-      <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm">
+      <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-            <Settings2 className="w-5 h-5" />
+          <div className="p-2 rounded-[6px] bg-[#712B13]/10 text-[#712B13] border border-[#712B13]/20">
+            <Settings2 className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-slate-200">
-              Configurações do Fluxo de Salvar
+            <h2 className="font-serif text-base font-medium text-[#2C2C2A]">
+              configurações do fluxo de salvar
             </h2>
-            <p className="text-xs text-slate-400">
-              Defina como a aplicação deve se comportar ao criar novas entradas
+            <p className="text-xs text-[#5F5E5A]">
+              defina como a aplicação deve se comportar ao criar novas entradas
             </p>
           </div>
         </div>
 
         {/* Toggle Switch */}
-        <div className="flex items-center justify-between p-4 bg-slate-950/60 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors">
+        <div className="flex items-center justify-between p-4 bg-[#FAF9F6] rounded-[8px] border border-[#D3D1C7]">
           <div className="pr-4">
-            <span className="text-sm font-medium text-slate-200 block">
-              Revisar itens com títulos gerados por IA antes de salvar
+            <span className="text-sm font-medium text-[#2C2C2A] block">
+              revisar itens com títulos gerados por ia antes de salvar
             </span>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Quando ativo, abre um modal de confirmação para validar/editar os títulos gerados pela IA antes de gravar no banco de dados.
+            <p className="text-xs text-[#5F5E5A] mt-0.5">
+              quando ativo, abre um modal de confirmação para validar/editar os títulos gerados pela ia antes de gravar no banco de dados.
             </p>
           </div>
 
@@ -114,12 +104,12 @@ export default function AdminClient({
             role="switch"
             aria-checked={requireConfirm}
             onClick={() => handleToggleSetting(!requireConfirm)}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-              requireConfirm ? "bg-indigo-600" : "bg-slate-800"
+            className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-[10px] border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              requireConfirm ? "bg-[#712B13]" : "bg-[#D3D1C7]"
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-[8px] bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
                 requireConfirm ? "translate-x-5" : "translate-x-0"
               }`}
             />
@@ -129,15 +119,15 @@ export default function AdminClient({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Contexts Section */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm space-y-6">
+        <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-6 shadow-sm space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <FolderKanban className="w-5 h-5 text-indigo-400" />
-              <h2 className="text-base font-semibold text-slate-200">
-                Contextos (Projetos)
+              <FolderKanban className="w-4 h-4 text-[#712B13]" />
+              <h2 className="font-serif text-base font-medium text-[#2C2C2A]">
+                contextos (projetos)
               </h2>
             </div>
-            <span className="text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-[#5F5E5A] bg-[#EFECE6] px-2 py-0.5 rounded-[6px] border border-[#D3D1C7]">
               {initialContexts.length}
             </span>
           </div>
@@ -149,49 +139,47 @@ export default function AdminClient({
                 type="text"
                 value={contextName}
                 onChange={(e) => setContextName(e.target.value)}
-                placeholder="Ex: Indicium, Pessoal, Estudos"
-                className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                placeholder="ex: Indicium, Pessoal, Estudos"
+                className="flex-1 bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3.5 py-2 text-xs text-[#2C2C2A] placeholder:text-[#888780] focus:outline-none focus:border-[#712B13]"
               />
               <button
                 type="submit"
                 disabled={isPending}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                className="border border-[#712B13] text-[#712B13] hover:bg-[#712B13]/10 font-medium px-4 py-2 rounded-[6px] text-xs flex items-center gap-1.5 transition-colors disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
-                Criar
+                criar
               </button>
             </div>
 
-            {/* Color selector with presets + custom picker */}
+            {/* Color selector with 8 families */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] text-slate-400">Cor:</span>
-              <div className="flex items-center gap-1.5">
-                {colorPresets.map((c) => (
+              <span className="text-[11px] text-[#5F5E5A]">cor:</span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {CHIP_FAMILIES.map((fam) => (
                   <button
-                    key={c}
+                    key={fam.id}
                     type="button"
-                    onClick={() => setContextColor(c)}
-                    style={{ backgroundColor: c }}
-                    className={`w-5 h-5 rounded-full transition-transform flex items-center justify-center ${
-                      contextColor === c ? "scale-125 ring-2 ring-white ring-offset-2 ring-offset-slate-950" : "opacity-75 hover:opacity-100"
+                    title={fam.name}
+                    onClick={() => setContextColor(fam.id)}
+                    style={{ backgroundColor: fam.light.bg, borderColor: fam.light.text }}
+                    className={`w-5 h-5 rounded-[6px] border transition-transform flex items-center justify-center ${
+                      contextColor === fam.id ? "scale-110 ring-2 ring-[#712B13] ring-offset-1" : "opacity-80 hover:opacity-100"
                     }`}
                   >
-                    {contextColor === c && <Check className="w-3 h-3 text-white" />}
+                    {contextColor === fam.id && <Check className="w-3 h-3 text-[#2C2C2A]" />}
                   </button>
                 ))}
 
                 {/* Custom Color Picker */}
                 <label
-                  title="Escolher cor personalizada"
-                  className="w-5 h-5 rounded-full border border-slate-700 bg-slate-900 cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
-                  style={{
-                    backgroundColor: colorPresets.includes(contextColor) ? undefined : contextColor,
-                  }}
+                  title="escolher cor personalizada"
+                  className="w-5 h-5 rounded-[6px] border border-[#D3D1C7] bg-[#FAF9F6] cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
                 >
-                  <Pipette className="w-3 h-3 text-slate-300" />
+                  <Pipette className="w-3 h-3 text-[#5F5E5A]" />
                   <input
                     type="color"
-                    value={contextColor}
+                    value={contextColor.startsWith("#") ? contextColor : "#712B13"}
                     onChange={(e) => setContextColor(e.target.value)}
                     className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                   />
@@ -203,63 +191,67 @@ export default function AdminClient({
           {/* Contexts List */}
           <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
             {initialContexts.length === 0 ? (
-              <p className="text-xs text-slate-500 text-center py-4">
-                Nenhum contexto cadastrado ainda.
+              <p className="text-xs text-[#888780] text-center py-4">
+                nenhum contexto cadastrado ainda.
               </p>
             ) : (
-              initialContexts.map((ctx) => (
-                <div
-                  key={ctx.id}
-                  className={`flex items-center justify-between p-3 rounded-xl border ${
-                    ctx.archived
-                      ? "bg-slate-950/40 border-slate-900 text-slate-500 opacity-60"
-                      : "bg-slate-950 border-slate-800 text-slate-200"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="w-3.5 h-3.5 rounded-full shrink-0"
-                      style={{ backgroundColor: ctx.color }}
-                    />
-                    <span className="text-sm font-medium">{ctx.name}</span>
-                    {ctx.archived && (
-                      <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
-                        Arquivado
-                      </span>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      startTransition(() =>
-                        toggleArchiveContext(ctx.id, ctx.archived)
-                      )
-                    }
-                    title={ctx.archived ? "Desarquivar" : "Arquivar"}
-                    className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors"
+              initialContexts.map((ctx) => {
+                const chipStyle = getChipStyle(ctx.color, "context");
+                return (
+                  <div
+                    key={ctx.id}
+                    className={`flex items-center justify-between p-2.5 rounded-[8px] border ${
+                      ctx.archived
+                        ? "bg-[#FAF9F6] border-[#D3D1C7] text-[#888780] opacity-60"
+                        : "bg-[#FAF9F6] border-[#D3D1C7] text-[#2C2C2A]"
+                    }`}
                   >
-                    {ctx.archived ? (
-                      <ArchiveRestore className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Archive className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              ))
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className="px-2.5 py-0.5 rounded-[8px] text-xs font-medium border"
+                        style={chipStyle}
+                      >
+                        {ctx.name}
+                      </span>
+                      {ctx.archived && (
+                        <span className="text-[10px] bg-[#EFECE6] text-[#5F5E5A] px-1.5 py-0.5 rounded-[6px]">
+                          arquivado
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        startTransition(() =>
+                          toggleArchiveContext(ctx.id, ctx.archived)
+                        )
+                      }
+                      title={ctx.archived ? "desarquivar" : "arquivar"}
+                      className="p-1.5 text-[#5F5E5A] hover:text-[#712B13] hover:bg-[#EFECE6] rounded-[6px] transition-colors"
+                    >
+                      {ctx.archived ? (
+                        <ArchiveRestore className="w-3.5 h-3.5 text-emerald-600" />
+                      ) : (
+                        <Archive className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
 
         {/* Categories Section */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm space-y-6">
+        <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-6 shadow-sm space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <Tag className="w-5 h-5 text-emerald-400" />
-              <h2 className="text-base font-semibold text-slate-200">
-                Categorias (Tags)
+              <Tag className="w-4 h-4 text-[#712B13]" />
+              <h2 className="font-serif text-base font-medium text-[#2C2C2A]">
+                categorias (tags)
               </h2>
             </div>
-            <span className="text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-[#5F5E5A] bg-[#EFECE6] px-2 py-0.5 rounded-[6px] border border-[#D3D1C7]">
               {initialCategories.length}
             </span>
           </div>
@@ -271,49 +263,47 @@ export default function AdminClient({
                 type="text"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
-                placeholder="Ex: Bug, Feature, Reunião"
-                className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
+                placeholder="ex: Bug, Feature, Reunião"
+                className="flex-1 bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3.5 py-2 text-xs text-[#2C2C2A] placeholder:text-[#888780] focus:outline-none focus:border-[#712B13]"
               />
               <button
                 type="submit"
                 disabled={isPending}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                className="border border-[#712B13] text-[#712B13] hover:bg-[#712B13]/10 font-medium px-4 py-2 rounded-[6px] text-xs flex items-center gap-1.5 transition-colors disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
-                Criar
+                criar
               </button>
             </div>
 
-            {/* Color selector with presets + custom picker */}
+            {/* Color selector with 8 families */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] text-slate-400">Cor:</span>
-              <div className="flex items-center gap-1.5">
-                {colorPresets.map((c) => (
+              <span className="text-[11px] text-[#5F5E5A]">cor:</span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {CHIP_FAMILIES.map((fam) => (
                   <button
-                    key={c}
+                    key={fam.id}
                     type="button"
-                    onClick={() => setCategoryColor(c)}
-                    style={{ backgroundColor: c }}
-                    className={`w-5 h-5 rounded-full transition-transform flex items-center justify-center ${
-                      categoryColor === c ? "scale-125 ring-2 ring-white ring-offset-2 ring-offset-slate-950" : "opacity-75 hover:opacity-100"
+                    title={fam.name}
+                    onClick={() => setCategoryColor(fam.id)}
+                    style={{ backgroundColor: fam.medium.bg, borderColor: fam.medium.text }}
+                    className={`w-5 h-5 rounded-[6px] border transition-transform flex items-center justify-center ${
+                      categoryColor === fam.id ? "scale-110 ring-2 ring-[#712B13] ring-offset-1" : "opacity-80 hover:opacity-100"
                     }`}
                   >
-                    {categoryColor === c && <Check className="w-3 h-3 text-white" />}
+                    {categoryColor === fam.id && <Check className="w-3 h-3 text-[#2C2C2A]" />}
                   </button>
                 ))}
 
                 {/* Custom Color Picker */}
                 <label
-                  title="Escolher cor personalizada"
-                  className="w-5 h-5 rounded-full border border-slate-700 bg-slate-900 cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
-                  style={{
-                    backgroundColor: colorPresets.includes(categoryColor) ? undefined : categoryColor,
-                  }}
+                  title="escolher cor personalizada"
+                  className="w-5 h-5 rounded-[6px] border border-[#D3D1C7] bg-[#FAF9F6] cursor-pointer flex items-center justify-center hover:scale-110 transition-transform relative overflow-hidden"
                 >
-                  <Pipette className="w-3 h-3 text-slate-300" />
+                  <Pipette className="w-3 h-3 text-[#5F5E5A]" />
                   <input
                     type="color"
-                    value={categoryColor}
+                    value={categoryColor.startsWith("#") ? categoryColor : "#712B13"}
                     onChange={(e) => setCategoryColor(e.target.value)}
                     className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                   />
@@ -325,49 +315,53 @@ export default function AdminClient({
           {/* Categories List */}
           <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
             {initialCategories.length === 0 ? (
-              <p className="text-xs text-slate-500 text-center py-4">
-                Nenhuma categoria cadastrada ainda.
+              <p className="text-xs text-[#888780] text-center py-4">
+                nenhuma categoria cadastrada ainda.
               </p>
             ) : (
-              initialCategories.map((cat) => (
-                <div
-                  key={cat.id}
-                  className={`flex items-center justify-between p-3 rounded-xl border ${
-                    cat.archived
-                      ? "bg-slate-950/40 border-slate-900 text-slate-500 opacity-60"
-                      : "bg-slate-950 border-slate-800 text-slate-200"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="w-3.5 h-3.5 rounded-full shrink-0"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    <span className="text-sm font-medium">{cat.name}</span>
-                    {cat.archived && (
-                      <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
-                        Arquivado
-                      </span>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      startTransition(() =>
-                        toggleArchiveCategory(cat.id, cat.archived)
-                      )
-                    }
-                    title={cat.archived ? "Desarquivar" : "Arquivar"}
-                    className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors"
+              initialCategories.map((cat) => {
+                const chipStyle = getChipStyle(cat.color, "category");
+                return (
+                  <div
+                    key={cat.id}
+                    className={`flex items-center justify-between p-2.5 rounded-[8px] border ${
+                      cat.archived
+                        ? "bg-[#FAF9F6] border-[#D3D1C7] text-[#888780] opacity-60"
+                        : "bg-[#FAF9F6] border-[#D3D1C7] text-[#2C2C2A]"
+                    }`}
                   >
-                    {cat.archived ? (
-                      <ArchiveRestore className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Archive className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              ))
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className="px-2.5 py-0.5 rounded-[8px] text-xs font-medium border"
+                        style={chipStyle}
+                      >
+                        {cat.name}
+                      </span>
+                      {cat.archived && (
+                        <span className="text-[10px] bg-[#EFECE6] text-[#5F5E5A] px-1.5 py-0.5 rounded-[6px]">
+                          arquivado
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        startTransition(() =>
+                          toggleArchiveCategory(cat.id, cat.archived)
+                        )
+                      }
+                      title={cat.archived ? "desarquivar" : "arquivar"}
+                      className="p-1.5 text-[#5F5E5A] hover:text-[#712B13] hover:bg-[#EFECE6] rounded-[6px] transition-colors"
+                    >
+                      {cat.archived ? (
+                        <ArchiveRestore className="w-3.5 h-3.5 text-emerald-600" />
+                      ) : (
+                        <Archive className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
