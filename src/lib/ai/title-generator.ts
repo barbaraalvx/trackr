@@ -33,7 +33,9 @@ export async function generateTitlesForItems(
 Para cada item, gere um "title" curto (até 8 palavras), objetivo, que nomeie a atividade.
 Não altere nem resuma a descrição original.
 
-Responda ESTRITAMENTE em formato JSON com o seguinte esquema:
+DIRETRIZ IMPORTANTE: sempre que a descrição contiver informações sobre impacto, resultado ou valor gerado pela atividade (ex: bug corrigido que afetava X usuários, feature que reduziu tempo de Y, documentação que desbloqueou o time), priorize capturar esse valor no título. Isso ajudará a profissional a se posicionar e se comunicar melhor futuramente.
+
+Resposta ESTRITAMENTE em formato JSON com o seguinte esquema:
 [
   { "index": 0, "title": "..." },
   { "index": 1, "title": "..." }
