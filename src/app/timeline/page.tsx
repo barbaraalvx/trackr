@@ -8,13 +8,13 @@ export default async function TimelinePage() {
   const categoriesList = await getCategories();
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 font-sans">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-100">
-          Timeline de Atividades
+        <h1 className="font-serif text-2xl sm:text-3xl font-medium text-[#2C2C2A]">
+          timeline de atividades
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Histórico cronológico de todos os seus registros estruturados
+        <p className="text-sm text-[#5F5E5A] mt-1">
+          histórico cronológico de todos os seus registros estruturados
         </p>
       </div>
 

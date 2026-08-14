@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { getTimelineEntries } from "./actions";
 import { renderMarkdownText } from "@/lib/utils/markdown-renderer";
+import { getChipStyle } from "@/lib/constants/chip-colors";
 import {
   Calendar,
   Filter,
@@ -62,21 +63,21 @@ export default function TimelineClient({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Filters Bar */}
-      <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-3">
+      <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-4 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-            <Filter className="w-4 h-4 text-indigo-400" />
-            Filtros da Timeline
+          <div className="flex items-center gap-2 text-xs font-medium text-[#2C2C2A]">
+            <Filter className="w-4 h-4 text-[#712B13]" />
+            filtros da timeline
           </div>
           {(contextId || categoryId || startDate || endDate) && (
             <button
               onClick={handleReset}
-              className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 transition-colors"
+              className="text-xs text-[#5F5E5A] hover:text-[#2C2C2A] flex items-center gap-1 bg-[#FAF9F6] px-2.5 py-1 rounded-[6px] border border-[#D3D1C7] transition-colors"
             >
               <RotateCcw className="w-3 h-3" />
-              Limpar Filtros
+              limpar filtros
             </button>
           )}
         </div>
@@ -84,16 +85,16 @@ export default function TimelineClient({
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {/* Context Filter */}
           <div>
-            <label className="block text-[11px] text-slate-400 mb-1">Contexto</label>
+            <label className="block text-[11px] text-[#5F5E5A] mb-1">contexto</label>
             <select
               value={contextId}
               onChange={(e) => {
                 setContextId(e.target.value);
                 handleFilter(e.target.value, categoryId, startDate, endDate);
               }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             >
-              <option value="">Todos os contextos</option>
+              <option value="">todos os contextos</option>
               {contextsList.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -104,16 +105,16 @@ export default function TimelineClient({
 
           {/* Category Filter */}
           <div>
-            <label className="block text-[11px] text-slate-400 mb-1">Categoria</label>
+            <label className="block text-[11px] text-[#5F5E5A] mb-1">categoria</label>
             <select
               value={categoryId}
               onChange={(e) => {
                 setCategoryId(e.target.value);
                 handleFilter(contextId, e.target.value, startDate, endDate);
               }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             >
-              <option value="">Todas as categorias</option>
+              <option value="">todas as categorias</option>
               {categoriesList.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -124,7 +125,7 @@ export default function TimelineClient({
 
           {/* Start Date Filter */}
           <div>
-            <label className="block text-[11px] text-slate-400 mb-1">Data Inicial</label>
+            <label className="block text-[11px] text-[#5F5E5A] mb-1">data inicial</label>
             <input
               type="date"
               value={startDate}
@@ -132,13 +133,13 @@ export default function TimelineClient({
                 setStartDate(e.target.value);
                 handleFilter(contextId, categoryId, e.target.value, endDate);
               }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             />
           </div>
 
           {/* End Date Filter */}
           <div>
-            <label className="block text-[11px] text-slate-400 mb-1">Data Final</label>
+            <label className="block text-[11px] text-[#5F5E5A] mb-1">data final</label>
             <input
               type="date"
               value={endDate}
@@ -146,7 +147,7 @@ export default function TimelineClient({
                 setEndDate(e.target.value);
                 handleFilter(contextId, categoryId, startDate, e.target.value);
               }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
             />
           </div>
         </div>
@@ -155,13 +156,13 @@ export default function TimelineClient({
       {/* Entries List */}
       <div className="space-y-6">
         {entriesList.length === 0 ? (
-          <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-12 text-center space-y-2">
-            <Calendar className="w-10 h-10 text-slate-600 mx-auto" />
-            <h3 className="text-base font-semibold text-slate-300">
-              Nenhuma entrada encontrada
+          <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-12 text-center space-y-2 shadow-sm">
+            <Calendar className="w-8 h-8 text-[#888780] mx-auto" />
+            <h3 className="font-serif text-base font-medium text-[#2C2C2A]">
+              nenhuma entrada encontrada
             </h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Não existem registros para os filtros selecionados. Tente ajustar os filtros ou registrar um novo dia.
+            <p className="text-xs text-[#5F5E5A] max-w-sm mx-auto">
+              não existem registros para os filtros selecionados. tente ajustar os filtros ou registrar um novo dia.
             </p>
           </div>
         ) : (
@@ -191,52 +192,42 @@ export default function TimelineClient({
             return (
               <div
                 key={entry.id}
-                className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm space-y-5 hover:border-slate-700/80 transition-colors shadow-lg"
+                className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] p-6 space-y-5 shadow-sm hover:border-[#B4B2A9] transition-colors"
               >
                 {/* Header: Date, Context badge, Categories chips */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#D3D1C7] pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300">
-                      <Calendar className="w-4 h-4 text-indigo-400" />
+                    <div className="p-2 rounded-[6px] bg-[#FAF9F6] border border-[#D3D1C7] text-[#712B13]">
+                      <Calendar className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-slate-100 capitalize">
+                      <h3 className="font-serif text-base font-medium text-[#2C2C2A] capitalize">
                         {formattedDate}
                       </h3>
-                      <span className="text-[11px] text-slate-500">
-                        Log #{entry.id.substring(0, 8)}
+                      <span className="text-[11px] text-[#888780]">
+                        log #{entry.id.substring(0, 8)}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    {/* Context Badge */}
+                    {/* Context Badge (Light Shade) */}
                     {entry.context && (
                       <span
-                        className="text-xs font-semibold px-3 py-1 rounded-xl border flex items-center gap-1.5"
-                        style={{
-                          backgroundColor: `${entry.context.color}15`,
-                          borderColor: `${entry.context.color}40`,
-                          color: entry.context.color,
-                        }}
+                        className="text-xs font-medium px-2.5 py-0.5 rounded-[8px] border"
+                        style={getChipStyle(entry.context.color, "context")}
                       >
-                        <FolderKanban className="w-3.5 h-3.5" />
                         {entry.context.name}
                       </span>
                     )}
 
-                    {/* Category Chips */}
+                    {/* Category Chips (Medium Shade) */}
                     {entry.entryCategories?.map((ec: any) => (
                       <span
                         key={ec.category.id}
-                        className="text-[11px] font-medium px-2.5 py-0.5 rounded-lg border flex items-center gap-1"
-                        style={{
-                          backgroundColor: `${ec.category.color}15`,
-                          borderColor: `${ec.category.color}30`,
-                          color: ec.category.color,
-                        }}
+                        className="text-xs font-medium px-2.5 py-0.5 rounded-[8px] border"
+                        style={getChipStyle(ec.category.color, "category")}
                       >
-                        <Tag className="w-3 h-3" />
                         {ec.category.name}
                       </span>
                     ))}
@@ -247,22 +238,22 @@ export default function TimelineClient({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Done Today */}
                   {doneItems.length > 0 && (
-                    <div className="bg-slate-950/60 border border-slate-800/60 rounded-xl p-4 space-y-2.5">
-                      <h4 className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Feito Hoje ({doneItems.length})
+                    <div className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-4 space-y-2.5">
+                      <h4 className="text-xs font-medium text-emerald-800 flex items-center gap-1.5 uppercase tracking-wider">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        feito hoje ({doneItems.length})
                       </h4>
                       <ul className="space-y-2">
                         {doneItems.map((item: any) => (
                           <li
                             key={item.id}
-                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1"
+                            className="text-xs bg-[#FFFFFF] p-2.5 rounded-[6px] border border-[#D3D1C7] space-y-1"
                           >
-                            <span className="font-semibold text-slate-200 block">
+                            <span className="font-medium text-[#2C2C2A] block">
                               {renderMarkdownText(item.title || item.description)}
                             </span>
                             {item.title && (
-                              <div className="text-slate-400 block text-[11px]">
+                              <div className="text-[#5F5E5A] block text-[11px]">
                                 {renderMarkdownText(item.description)}
                               </div>
                             )}
@@ -274,22 +265,22 @@ export default function TimelineClient({
 
                   {/* Plan Tomorrow */}
                   {planItems.length > 0 && (
-                    <div className="bg-slate-950/60 border border-slate-800/60 rounded-xl p-4 space-y-2.5">
-                      <h4 className="text-xs font-semibold text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <ListTodo className="w-4 h-4" />
-                        Planejado para Amanhã ({planItems.length})
+                    <div className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-4 space-y-2.5">
+                      <h4 className="text-xs font-medium text-blue-800 flex items-center gap-1.5 uppercase tracking-wider">
+                        <ListTodo className="w-3.5 h-3.5" />
+                        planejado amanhã ({planItems.length})
                       </h4>
                       <ul className="space-y-2">
                         {planItems.map((item: any) => (
                           <li
                             key={item.id}
-                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1"
+                            className="text-xs bg-[#FFFFFF] p-2.5 rounded-[6px] border border-[#D3D1C7] space-y-1"
                           >
-                            <span className="font-semibold text-slate-200 block">
+                            <span className="font-medium text-[#2C2C2A] block">
                               {renderMarkdownText(item.title || item.description)}
                             </span>
                             {item.title && (
-                              <div className="text-slate-400 block text-[11px]">
+                              <div className="text-[#5F5E5A] block text-[11px]">
                                 {renderMarkdownText(item.description)}
                               </div>
                             )}
@@ -301,22 +292,22 @@ export default function TimelineClient({
 
                   {/* Blockers */}
                   {blockerItems.length > 0 && (
-                    <div className="bg-slate-950/60 border border-slate-800/60 rounded-xl p-4 space-y-2.5">
-                      <h4 className="text-xs font-semibold text-rose-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <AlertOctagon className="w-4 h-4" />
-                        Bloqueios ({blockerItems.length})
+                    <div className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-4 space-y-2.5">
+                      <h4 className="text-xs font-medium text-rose-800 flex items-center gap-1.5 uppercase tracking-wider">
+                        <AlertOctagon className="w-3.5 h-3.5" />
+                        bloqueios ({blockerItems.length})
                       </h4>
                       <ul className="space-y-2">
                         {blockerItems.map((item: any) => (
                           <li
                             key={item.id}
-                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1"
+                            className="text-xs bg-[#FFFFFF] p-2.5 rounded-[6px] border border-[#D3D1C7] space-y-1"
                           >
-                            <span className="font-semibold text-rose-300 block">
+                            <span className="font-medium text-rose-900 block">
                               {renderMarkdownText(item.title || item.description)}
                             </span>
                             {item.title && (
-                              <div className="text-slate-400 block text-[11px]">
+                              <div className="text-[#5F5E5A] block text-[11px]">
                                 {renderMarkdownText(item.description)}
                               </div>
                             )}
@@ -328,22 +319,22 @@ export default function TimelineClient({
 
                   {/* Comments */}
                   {commentItems.length > 0 && (
-                    <div className="bg-slate-950/60 border border-slate-800/60 rounded-xl p-4 space-y-2.5">
-                      <h4 className="text-xs font-semibold text-amber-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <MessageSquare className="w-4 h-4" />
-                        Comentários Extra ({commentItems.length})
+                    <div className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-4 space-y-2.5">
+                      <h4 className="text-xs font-medium text-amber-800 flex items-center gap-1.5 uppercase tracking-wider">
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        comentários extra ({commentItems.length})
                       </h4>
                       <ul className="space-y-2">
                         {commentItems.map((item: any) => (
                           <li
                             key={item.id}
-                            className="text-xs bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1"
+                            className="text-xs bg-[#FFFFFF] p-2.5 rounded-[6px] border border-[#D3D1C7] space-y-1"
                           >
-                            <span className="font-semibold text-slate-200 block">
+                            <span className="font-medium text-[#2C2C2A] block">
                               {renderMarkdownText(item.title || item.description)}
                             </span>
                             {item.title && (
-                              <div className="text-slate-400 block text-[11px]">
+                              <div className="text-[#5F5E5A] block text-[11px]">
                                 {renderMarkdownText(item.description)}
                               </div>
                             )}
@@ -356,10 +347,10 @@ export default function TimelineClient({
 
                 {/* Artifacts Section */}
                 {entry.artifacts && entry.artifacts.length > 0 && (
-                  <div className="pt-2 border-t border-slate-800/60 flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 mr-1">
-                      <Link2 className="w-3.5 h-3.5 text-indigo-400" />
-                      Artefatos:
+                  <div className="pt-2 border-t border-[#D3D1C7] flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] font-medium text-[#5F5E5A] flex items-center gap-1 mr-1">
+                      <Link2 className="w-3.5 h-3.5 text-[#712B13]" />
+                      artefatos:
                     </span>
                     {entry.artifacts.map((art: any) => (
                       <a
@@ -367,10 +358,10 @@ export default function TimelineClient({
                         href={art.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-indigo-300 hover:text-indigo-200 bg-indigo-950/40 hover:bg-indigo-950/80 px-2.5 py-1 rounded-lg border border-indigo-800/50 flex items-center gap-1.5 transition-colors"
+                        className="text-xs text-[#712B13] hover:underline bg-[#FAF9F6] px-2.5 py-1 rounded-[6px] border border-[#D3D1C7] flex items-center gap-1.5 transition-colors"
                       >
                         <span>{art.label || art.url}</span>
-                        <ExternalLink className="w-3 h-3 text-indigo-400" />
+                        <ExternalLink className="w-3 h-3 text-[#712B13]" />
                       </a>
                     ))}
                   </div>
