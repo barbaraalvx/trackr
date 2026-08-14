@@ -71,17 +71,22 @@ export const CHIP_FAMILIES: ChipFamily[] = [
 ];
 
 /**
-  Given a hex or color string stored in database, return appropriate chip styles
-  type: 'context' (uses light bg) or 'category' (uses medium bg)
+  Given a hex or color string stored in database + optional customTextColor,
+  return appropriate chip styles for 'context' or 'category'.
  */
 export function getChipStyle(
   colorInput: string | undefined | null,
-  type: "context" | "category"
+  type: "context" | "category",
+  customTextColor?: string | null
 ): { backgroundColor: string; color: string; borderColor: string } {
   if (!colorInput) {
     const fallback = CHIP_FAMILIES[0];
     const pair = type === "context" ? fallback.light : fallback.medium;
-    return { backgroundColor: pair.bg, color: pair.text, borderColor: pair.bg };
+    return {
+      backgroundColor: pair.bg,
+      color: customTextColor || pair.text,
+      borderColor: pair.bg,
+    };
   }
 
   // Check if input matches one of our 8 family IDs or preview/bg hex
@@ -97,7 +102,7 @@ export function getChipStyle(
     const pair = type === "context" ? family.light : family.medium;
     return {
       backgroundColor: pair.bg,
-      color: pair.text,
+      color: customTextColor || pair.text,
       borderColor: pair.bg,
     };
   }
@@ -105,7 +110,7 @@ export function getChipStyle(
   // Custom hex fallback
   return {
     backgroundColor: colorInput,
-    color: "#2C2C2A",
+    color: customTextColor || "#2C2C2A",
     borderColor: "#D3D1C7",
   };
 }

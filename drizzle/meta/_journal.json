@@ -8,6 +8,13 @@
       "when": 1786718636311,
       "tag": "0000_daily_franklin_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786738998271,
+      "tag": "0001_striped_punisher",
+      "breakpoints": true
     }
   ]
 }

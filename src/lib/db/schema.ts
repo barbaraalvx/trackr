@@ -32,6 +32,7 @@ export const contexts = pgTable("contexts", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull().unique(),
   color: text("color").notNull().default("#3b82f6"),
+  textColor: text("text_color"),
   archived: boolean("archived").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -43,6 +44,7 @@ export const categories = pgTable("categories", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull().unique(),
   color: text("color").notNull().default("#10b981"),
+  textColor: text("text_color"),
   archived: boolean("archived").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
