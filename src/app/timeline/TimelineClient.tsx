@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { getTimelineEntries } from "./actions";
+import { getTimelineEntries, updateEntry, deleteEntry, UpdateEntryPayload } from "./actions";
 import { renderMarkdownText } from "@/lib/utils/markdown-renderer";
 import { getChipStyle } from "@/lib/constants/chip-colors";
 import {
@@ -19,6 +19,11 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
+  Pencil,
+  Trash2,
+  Plus,
+  X,
+  Save,
 } from "lucide-react";
 
 const PAGE_SIZE = 9;
@@ -29,10 +34,12 @@ interface TimelineClientProps {
   categoriesList: any[];
 }
 
-function EntryCard({ entry, isExpanded, onToggle }: {
+function EntryCard({ entry, isExpanded, onToggle, onEdit, onDelete }: {
   entry: any;
   isExpanded: boolean;
   onToggle: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const formattedDate = new Date(entry.entryDate + "T00:00:00").toLocaleDateString("pt-BR", {
     weekday: "short",
@@ -227,6 +234,26 @@ function EntryCard({ entry, isExpanded, onToggle }: {
               ))}
             </div>
           )}
+
+          {/* Edit / Delete actions */}
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#D3D1C7]">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs text-rose-700 border border-rose-200 hover:bg-rose-50 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              apagar entrada
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs text-[#712B13] border border-[#712B13]/40 hover:bg-[#712B13]/10 transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              editar entrada
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -247,6 +274,112 @@ export default function TimelineClient({
   const [currentPage, setCurrentPage] = useState(1);
 
   const [isPending, startTransition] = useTransition();
+
+  // Edit Modal State
+  const [editingEntry, setEditingEntry] = useState<any | null>(null);
+  const [editDate, setEditDate] = useState("");
+  const [editContextId, setEditContextId] = useState("");
+  const [editCategoryIds, setEditCategoryIds] = useState<string[]>([]);
+  const [editActivityItems, setEditActivityItems] = useState<
+    { id?: string; type: "done_today" | "plan_tomorrow" | "blocker" | "comment"; title: string; description: string }[]
+  >([]);
+  const [editArtifacts, setEditArtifacts] = useState<{ id?: string; label: string; url: string }[]>([]);
+
+  const handleOpenEditModal = (entry: any) => {
+    setEditingEntry(entry);
+    setEditDate(entry.entryDate);
+    setEditContextId(entry.contextId || "");
+    setEditCategoryIds(entry.entryCategories?.map((ec: any) => ec.category.id) || []);
+    setEditActivityItems(
+      entry.activityItems.map((item: any) => ({
+        id: item.id,
+        type: item.type,
+        title: item.title || "",
+        description: item.description || "",
+      }))
+    );
+    setEditArtifacts(
+      entry.artifacts?.map((art: any) => ({
+        id: art.id,
+        label: art.label || "",
+        url: art.url || "",
+      })) || []
+    );
+  };
+
+  const handleAddActivityItem = () => {
+    setEditActivityItems((prev) => [
+      ...prev,
+      { type: "done_today", title: "", description: "" },
+    ]);
+  };
+
+  const handleUpdateActivityItem = (index: number, field: string, value: string) => {
+    setEditActivityItems((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleRemoveActivityItem = (index: number) => {
+    setEditActivityItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddArtifact = () => {
+    setEditArtifacts((prev) => [...prev, { label: "", url: "" }]);
+  };
+
+  const handleUpdateArtifact = (index: number, field: string, value: string) => {
+    setEditArtifacts((prev) =>
+      prev.map((art, i) => (i === index ? { ...art, [field]: value } : art))
+    );
+  };
+
+  const handleRemoveArtifact = (index: number) => {
+    setEditArtifacts((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingEntry) return;
+
+    startTransition(async () => {
+      await updateEntry({
+        entryId: editingEntry.id,
+        entryDate: editDate,
+        contextId: editContextId || null,
+        categoryIds: editCategoryIds,
+        activityItems: editActivityItems,
+        artifacts: editArtifacts,
+      });
+
+      setEditingEntry(null);
+      // Refresh entries
+      const updated = await getTimelineEntries({
+        contextId: contextId || undefined,
+        categoryId: categoryId || undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      });
+      setEntriesList(updated);
+    });
+  };
+
+  const handleDeleteEntry = (entryId: string) => {
+    if (!window.confirm("Tem certeza que deseja apagar esta entrada? Esta ação não pode ser desfeita.")) {
+      return;
+    }
+
+    startTransition(async () => {
+      await deleteEntry(entryId);
+      if (expandedId === entryId) setExpandedId(null);
+      const updated = await getTimelineEntries({
+        contextId: contextId || undefined,
+        categoryId: categoryId || undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      });
+      setEntriesList(updated);
+    });
+  };
 
   const handleFilter = (
     newCtx = contextId,
@@ -380,8 +513,214 @@ export default function TimelineClient({
               entry={entry}
               isExpanded={expandedId === entry.id}
               onToggle={() => handleToggleCard(entry.id)}
+              onEdit={() => handleOpenEditModal(entry)}
+              onDelete={() => handleDeleteEntry(entry.id)}
             />
           ))}
+        </div>
+      )}
+
+      {/* Edit Entry Modal */}
+      {editingEntry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
+            <div className="flex items-center justify-between border-b border-[#D3D1C7] pb-3">
+              <h2 className="font-serif text-lg font-medium text-[#2C2C2A] flex items-center gap-2">
+                <Pencil className="w-4 h-4 text-[#712B13]" />
+                editar entrada
+              </h2>
+              <button
+                type="button"
+                onClick={() => setEditingEntry(null)}
+                className="p-1 text-[#888780] hover:text-[#2C2C2A] rounded-[6px]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Date & Context */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-[#5F5E5A] mb-1">data da entrada</label>
+                  <input
+                    type="date"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[#5F5E5A] mb-1">contexto</label>
+                  <select
+                    value={editContextId}
+                    onChange={(e) => setEditContextId(e.target.value)}
+                    className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-3 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
+                  >
+                    <option value="">sem contexto</option>
+                    {contextsList.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Categories */}
+              <div>
+                <label className="block text-xs font-medium text-[#5F5E5A] mb-1.5">categorias</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {categoriesList.map((cat) => {
+                    const isSelected = editCategoryIds.includes(cat.id);
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() =>
+                          setEditCategoryIds((prev) =>
+                            isSelected ? prev.filter((id) => id !== cat.id) : [...prev, cat.id]
+                          )
+                        }
+                        className={`text-xs px-2.5 py-1 rounded-[6px] border transition-all ${
+                          isSelected
+                            ? "bg-[#712B13] text-white border-[#712B13]"
+                            : "bg-[#FAF9F6] text-[#5F5E5A] border-[#D3D1C7] hover:border-[#B4B2A9]"
+                        }`}
+                      >
+                        {cat.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Activity Items */}
+              <div className="space-y-3 pt-2 border-t border-[#D3D1C7]">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-[#5F5E5A] uppercase tracking-wider">
+                    atividades
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAddActivityItem}
+                    className="text-xs text-[#712B13] hover:underline flex items-center gap-1 font-medium"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    adicionar item
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {editActivityItems.map((item, idx) => (
+                    <div key={idx} className="bg-[#FAF9F6] border border-[#D3D1C7] rounded-[8px] p-3 space-y-2 relative">
+                      <div className="flex items-center justify-between gap-2">
+                        <select
+                          value={item.type}
+                          onChange={(e) => handleUpdateActivityItem(idx, "type", e.target.value)}
+                          className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-2 py-1 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
+                        >
+                          <option value="done_today">feito hoje</option>
+                          <option value="plan_tomorrow">planejado amanhã</option>
+                          <option value="blocker">bloqueio</option>
+                          <option value="comment">comentário extra</option>
+                        </select>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveActivityItem(idx)}
+                          className="text-rose-600 hover:text-rose-800 p-1 text-xs"
+                          title="Remover item"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <input
+                        type="text"
+                        placeholder="título curto (opcional)"
+                        value={item.title}
+                        onChange={(e) => handleUpdateActivityItem(idx, "title", e.target.value)}
+                        className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-2.5 py-1 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
+                      />
+
+                      <textarea
+                        rows={2}
+                        placeholder="descrição do item (suporta markdown)"
+                        value={item.description}
+                        onChange={(e) => handleUpdateActivityItem(idx, "description", e.target.value)}
+                        className="w-full bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-2.5 py-1.5 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Artifacts */}
+              <div className="space-y-3 pt-2 border-t border-[#D3D1C7]">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-[#5F5E5A] uppercase tracking-wider">
+                    artefatos / links
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAddArtifact}
+                    className="text-xs text-[#712B13] hover:underline flex items-center gap-1 font-medium"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    adicionar link
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {editArtifacts.map((art, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="Rótulo (ex: PR #123)"
+                        value={art.label}
+                        onChange={(e) => handleUpdateArtifact(idx, "label", e.target.value)}
+                        className="w-1/3 bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-2.5 py-1 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
+                      />
+                      <input
+                        type="url"
+                        placeholder="https://..."
+                        value={art.url}
+                        onChange={(e) => handleUpdateArtifact(idx, "url", e.target.value)}
+                        className="flex-1 bg-[#FFFFFF] border border-[#D3D1C7] rounded-[6px] px-2.5 py-1 text-xs text-[#2C2C2A] focus:outline-none focus:border-[#712B13]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveArtifact(idx)}
+                        className="text-rose-600 hover:text-rose-800 p-1"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#D3D1C7]">
+              <button
+                type="button"
+                onClick={() => setEditingEntry(null)}
+                className="px-4 py-2 text-xs text-[#5F5E5A] hover:text-[#2C2C2A] bg-[#FAF9F6] border border-[#D3D1C7] rounded-[6px]"
+              >
+                cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={isPending}
+                className="px-4 py-2 text-xs font-medium text-white bg-[#712B13] hover:bg-[#5A220F] rounded-[6px] flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <Save className="w-3.5 h-3.5" />
+                salvar alterações
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
