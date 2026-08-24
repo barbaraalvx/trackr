@@ -15,6 +15,11 @@ export async function getSavedSummaries() {
     .limit(50);
 }
 
+export async function deleteSummary(summaryId: string) {
+  await db.delete(summaries).where(eq(summaries.id, summaryId));
+  revalidatePath("/summaries");
+}
+
 
 export async function getOrGenerateSummary(params: {
   periodType: "daily" | "weekly" | "biweekly" | "monthly" | "custom";

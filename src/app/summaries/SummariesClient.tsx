@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { getOrGenerateSummary } from "./actions";
+import { getOrGenerateSummary, deleteSummary } from "./actions";
 import { renderMarkdownText } from "@/lib/utils/markdown-renderer";
 import {
   Sparkles,
@@ -17,6 +17,7 @@ import {
   History,
   ChevronDown,
   ChevronUp,
+  Trash2,
 } from "lucide-react";
 
 interface SummariesClientProps {
@@ -196,6 +197,17 @@ export default function SummariesClient({ contextsList, savedSummaries }: Summar
 
   // History accordion state
   const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
+  const [deletingSummaryId, setDeletingSummaryId] = useState<string | null>(null);
+
+  const handleDeleteSummary = (id: string) => {
+    if (!window.confirm("Tem certeza que deseja apagar esta análise de IA permanentemente? Esta ação não pode ser desfeita.")) return;
+    setDeletingSummaryId(id);
+    startTransition(async () => {
+      await deleteSummary(id);
+      setDeletingSummaryId(null);
+      if (expandedHistoryId === id) setExpandedHistoryId(null);
+    });
+  };
 
   const handleGenerate = (forceRegenerate = false) => {
     startTransition(async () => {
@@ -354,39 +366,51 @@ export default function SummariesClient({ contextsList, savedSummaries }: Summar
                   className="bg-[#FFFFFF] border border-[#D3D1C7] rounded-[10px] shadow-sm overflow-hidden"
                 >
                   {/* Accordion header */}
-                  <button
-                    type="button"
-                    onClick={() => setExpandedHistoryId(isExpanded ? null : s.id)}
-                    className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-[#FAF9F6] transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="p-1.5 rounded-[6px] bg-[#712B13]/10 text-[#712B13] shrink-0">
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-medium text-[#2C2C2A] capitalize">
-                            {periodLabel}
-                          </span>
-                          <span className="text-xs text-[#5F5E5A]">{dateRange}</span>
-                          {s.isClosedPeriod && (
-                            <span className="text-[10px] bg-[#EFECE6] text-[#5F5E5A] px-1.5 py-0.5 rounded-[6px] border border-[#D3D1C7]">
-                              fechado
-                            </span>
-                          )}
+                  {/* Accordion header row */}
+                  <div className="flex items-center gap-0">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedHistoryId(isExpanded ? null : s.id)}
+                      className="flex-1 flex items-center justify-between gap-3 p-4 text-left hover:bg-[#FAF9F6] transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="p-1.5 rounded-[6px] bg-[#712B13]/10 text-[#712B13] shrink-0">
+                          <Sparkles className="w-3.5 h-3.5" />
                         </div>
-                        <span className="text-[11px] text-[#888780]">
-                          gerado em {generatedAt}
-                          {s.regeneratedCount > 0 && ` · ${s.regeneratedCount}x regenerado`}
-                        </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-medium text-[#2C2C2A] capitalize">
+                              {periodLabel}
+                            </span>
+                            <span className="text-xs text-[#5F5E5A]">{dateRange}</span>
+                            {s.isClosedPeriod && (
+                              <span className="text-[10px] bg-[#EFECE6] text-[#5F5E5A] px-1.5 py-0.5 rounded-[6px] border border-[#D3D1C7]">
+                                fechado
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-[#888780]">
+                            gerado em {generatedAt}
+                            {s.regeneratedCount > 0 && ` · ${s.regeneratedCount}x regenerado`}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-[#888780] shrink-0" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-[#888780] shrink-0" />
-                    )}
-                  </button>
+                      {isExpanded ? (
+                        <ChevronUp className="w-4 h-4 text-[#888780] shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-[#888780] shrink-0" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSummary(s.id)}
+                      disabled={deletingSummaryId === s.id}
+                      title="Apagar análise"
+                      className="p-4 text-[#888780] hover:text-rose-700 hover:bg-rose-50 transition-colors border-l border-[#D3D1C7] rounded-r-[10px] shrink-0 disabled:opacity-40"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
 
                   {/* Accordion body */}
                   {isExpanded && (
